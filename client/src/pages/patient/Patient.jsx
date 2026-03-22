@@ -12,40 +12,71 @@ const Patient = () => {
   const [loadingRecords, setLoadingRecords] = useState(true);
 
   useEffect(() => {
-    if (!contract || !accounts) return;
+    if (!contract || !accounts?.length) {
+      setLoadingRecords(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingRecords(true);
 
     const fetchRecords = async () => {
       try {
         const recs = await contract.methods
           .getRecords(accounts[0])
           .call({ from: accounts[0] });
-        setRecords(recs);
+        if (!cancelled) setRecords(recs);
       } catch (err) {
         console.error(err);
       } finally {
-        setLoadingRecords(false);
+        if (!cancelled) setLoadingRecords(false);
       }
     };
 
     fetchRecords();
+    return () => {
+      cancelled = true;
+    };
   }, [contract, accounts]);
 
-  if (loading || loadingRecords) {
+  if (loading) {
     return (
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading || loadingRecords}
+        open={loading}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
     );
   }
 
-  if (!accounts) {
+  if (loadingRecords) {
+    return (
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loadingRecords}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    );
+  }
+
+  if (!accounts?.length) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
         <Typography variant="h6">
           Open your MetaMask wallet to get connected, then refresh this page
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!contract) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5} px={2}>
+        <Typography variant="h6" textAlign="center">
+          No EHR contract found on this network. Deploy the contract with Truffle on the same chain as
+          MetaMask, then refresh (ensure client/src/contracts/EHR.json includes this network).
         </Typography>
       </Box>
     );
@@ -70,46 +101,33 @@ const Patient = () => {
   }
 
   return (
-    <Box display="flex" justifyContent="center" width="100%" sx={{ minHeight: '100vh', p: { xs: 1, md: 2 } }}>
-      <Box width={{ xs: "100%", sm: "90%", md: "70%" }}>
-        {/* Header Card */}
+    <Box display="flex" justifyContent="center" width="100%" sx={{ py: 1 }}>
+      <Box width={{ xs: "100%", md: "90%" }}>
         <Card sx={{
-          mb: 4,
-          background: 'linear-gradient(135deg, #00bcd4 0%, #0087a8 100%)',
+          mb: 3,
+          background: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)",
           color: 'white',
-          boxShadow: 6,
-          animation: 'fadeInDown 0.6s ease-in-out',
-          '@keyframes fadeInDown': {
-            from: { opacity: 0, transform: 'translateY(-20px)' },
-            to: { opacity: 1, transform: 'translateY(0)' },
-          },
         }}>
           <CardContent>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
-              📁 My Medical Records
+              My Medical Records
             </Typography>
             <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
-              Securely stored on the blockchain • encrypted with IPFS
+              References stored on-chain • file content on IPFS (add end-to-end encryption for real PHI)
             </Typography>
           </CardContent>
         </Card>
 
-        {/* Records List */}
         {records.length === 0 ? (
           <Card sx={{
             boxShadow: 2,
-            background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
-            animation: 'fadeInUp 0.6s ease-in-out 0.2s both',
-            '@keyframes fadeInUp': {
-              from: { opacity: 0, transform: 'translateY(20px)' },
-              to: { opacity: 1, transform: 'translateY(0)' },
-            },
+            background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
           }}>
             <CardContent sx={{ py: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Typography variant="h6" color="textSecondary" mb={1}>
-                📭 No Records Yet
+              <Typography variant="h6" color="text.secondary" mb={1}>
+                No Records Yet
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2" color="text.secondary">
                 Your medical records will appear here once your doctor uploads them.
               </Typography>
             </CardContent>
@@ -117,13 +135,7 @@ const Patient = () => {
         ) : (
           <Box display="flex" flexDirection="column" gap={2}>
             {records.map((record, index) => (
-              <Box key={index} sx={{
-                animation: `fadeIn 0.4s ease-in-out ${0.3 + index * 0.1}s both`,
-                '@keyframes fadeIn': {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
-              }}>
+              <Box key={index}>
                 <Record record={record} />
               </Box>
             ))}

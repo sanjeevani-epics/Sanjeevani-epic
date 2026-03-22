@@ -5,8 +5,8 @@ import AuthProvider from "./contexts/AuthContext/AuthProvider";
 import useAuth from "./contexts/AuthContext/useAuth";
 import Login from "./components/Auth/Login";
 import { AlertProvider } from "./contexts/AlertContext/AlertContext";
-import { useRoutes, Navigate } from "react-router-dom";
-import routes from "./routes"; // Verify this import points to the correct file
+import { useRoutes, Navigate, useLocation } from "react-router-dom";
+import routes from "./routes";
 import Register from "./components/Register";
 
 window.global = window;
@@ -14,8 +14,8 @@ window.global = window;
 function AppContent() {
   const { state } = useContext(EthContext);
   const { user } = useAuth();
+  const location = useLocation();
   
-  // FIX: Added a safety check to ensure routes is an array before passing to useRoutes
   const routesArray = Array.isArray(routes) ? routes : [];
   const content = useRoutes(routesArray);
 
@@ -23,8 +23,27 @@ function AppContent() {
     return <div style={{ textAlign: "center", marginTop: "20%" }}>Loading Blockchain Data...</div>;
   }
 
-  // Allow public access to home ('/') without login, otherwise require login
-  const path = window.location.pathname || "/";
+  if (state.initError) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "15%",
+          padding: "0 24px",
+          maxWidth: 520,
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+      >
+        <p style={{ color: "#b91c1c", marginBottom: 16 }}>{state.initError}</p>
+        <button type="button" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const path = location.pathname || "/";
   if (!user && path !== "/") {
     return <Login />;
   }
@@ -33,7 +52,6 @@ function AppContent() {
     return <Register />;
   }
 
-  // Redirect logic to send doctors/patients to their specific dashboards when on root
   if (path === "/") {
     if (user && state.role === "doctor") return <Navigate to="/doctor" replace />;
     if (user && state.role === "patient") return <Navigate to="/patient" replace />;

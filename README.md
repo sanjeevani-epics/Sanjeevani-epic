@@ -1,72 +1,192 @@
-<h1 align="center"> <br> <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://github.com/GAUTAMKUMARYADAV100/Gautam_Certification/blob/main/sanjeevanilogo/LogoTealBG.jpg?raw=true" alt="Markdownify" width="300"></a> <br> </h1> <h4 align="center">A blockchain-based Electrical Medical Records (EMR) system.</h4> <p align="center"> <a href="#key-features">Key Features</a> • <a href="#how-it-works">How It Works</a> • <a href="#how-to-use">How To Use</a> • <a href="#support">Support</a> </p>
-Key Features
+# Sanjeevani
 
-Sanjeevani is powered by IPFS
-, where every patient's medical records are stored on the distributed file system, not owned by any centralized entity like hospitals or governments. Each patient has a digital identity on Ethereum
- blockchain, who and whose doctor can access medical records by interacting with smart contracts.
+<p align="center">
+  <img src="https://github.com/GAUTAMKUMARYADAV100/Gautam_Certification/blob/main/sanjeevanilogo/LogoTealBG.jpg?raw=true" alt="Sanjeevani logo" width="280" />
+</p>
 
-On Sanjeevani,
+<p align="center"><strong>Blockchain-based Electronic Medical Records (EMR) demo</strong></p>
 
-A healthcare provider can register using a crypto wallet like Metamask.
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#tech-stack">Tech stack</a> •
+  <a href="#prerequisites">Prerequisites</a> •
+  <a href="#setup">Setup</a> •
+  <a href="#environment-variables">Environment</a> •
+  <a href="#smart-contract">Smart contract</a> •
+  <a href="#testing">Testing</a> •
+  <a href="#security-notes">Security</a>
+</p>
 
-The healthcare provider can register a patient by using the public address of the patient’s wallet, usually provided during an appointment.
+---
 
-The health provider can search for a patient’s records using the address, and upload a new record for the patient.
+## Overview
 
-The patient can also view his or her records, after connected with a wallet which address is registered by the health provider.
+Sanjeevani is a **single-page app** where:
 
-This project is the 3rd place winner of NextStep Hacks 2022
-.
+- **Doctors** connect with **MetaMask**, register on-chain, register **patients** by wallet address, search patients, and **upload files** that are **pinned to IPFS** (via **Pinata**). The **IPFS CID** and metadata are stored in the **`EHR` smart contract**.
+- **Patients** connect with MetaMask and view **their own** record list and open files through an **IPFS gateway** link.
 
-How It Works
+There is **no separate backend server** in this repo: the browser talks to **MetaMask**, the **Ethereum JSON-RPC** endpoint you configure in the wallet, and **Pinata’s HTTP API** for uploads.
 
-There are three major components of Sanjeevani:
+> This project placed **3rd at NextStep Hacks 2022**.
 
-React client (connected with MetaMask)
+---
 
-Solidity smart contract on Ethereum blockchain
+## Tech stack
 
-Interplanetary file system (IPFS)
+| Layer | Technology |
+|--------|------------|
+| UI | React 18, React Router 6, MUI (Material UI) |
+| Build | **Vite** (`npm run dev` / `npm run build`) |
+| Wallet / chain | **Web3.js** + **MetaMask** |
+| Contracts | **Truffle**, Solidity **`EHR.sol`** (compiler **0.8.14** in `truffle/truffle-config.js`) |
+| File storage | **IPFS** via **Pinata** (`client/src/ipfs.js` — `axios` + Pinata pin API) |
 
-<p align="center"> <img src="https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/002/187/785/datas/original.png" width="700"/> </p>
+---
 
-The client first connects with crypto wallet, and use smart contract to mint a patient or doctor block if the public address of the user’s wallet is not registered.
+## Prerequisites
 
-The client can upload a record file to IPFS, which address is linked to a patient block in ETH chain. The client can get all record addressed stored in a patient block from smart contract, and get a record file by its address from IPFS.
+- **Node.js** (LTS recommended)
+- **MetaMask** browser extension
+- A local Ethereum node compatible with Truffle’s **development** network, e.g. **Ganache** listening on **`127.0.0.1:7545`** (matches `truffle/truffle-config.js`)
+- A **Pinata** account and a **JWT** for the Pinning API (for doctor uploads)
 
-How To Use
+---
 
-Install Truffle globally if you haven't.
+## Setup
 
-$ npm install -g truffle
+### 1. Smart contracts (Truffle)
 
+From the repo root:
 
-Install Truffle dependencies and deploy smart contracts to local Ethereum network like Ganache
-.
+```bash
+cd truffle
+npm install
+```
 
-$ cd truffle
-$ npm install
-$ truffle compile
-$ truffle deploy
+Start your local chain (e.g. Ganache) on **port 7545**, then:
 
+```bash
+npx truffle compile
+npx truffle migrate
+```
 
-Install React dependencies and start React app.
+**Artifacts:** `truffle/truffle-config.js` sets `contracts_build_directory` to **`../client/src/contracts`**. After `compile` / `migrate`, **`EHR.json`** is written to **`client/src/contracts/`** automatically—you do **not** need to copy it by hand unless you change that path.
 
-$ cd ../client
-$ npm install
-$ npm start
+> **Note:** The root `.gitignore` ignores `client/src/contracts`. After a fresh clone you must run **`truffle compile`** (and deploy/migrate as needed) so `client/src/contracts/EHR.json` exists locally.
 
+### 2. Client (Vite + React)
 
-Add your Infura IPFS project ID and secret to .env. You can create an project here
-.
+```bash
+cd ../client
+npm install
+```
 
-REACT_APP_IPFS_PROJECT_ID={YOUR_IPFS_PROJECT_ID}
-REACT_APP_IPFS_PROJECT_SECRET={YOUR_IPFS_PROJECT_SECRET}
+Copy environment template and add your Pinata JWT:
 
+```bash
+# Windows (PowerShell): copy .env.example .env
+# macOS/Linux: cp .env.example .env
+```
 
-You should be able to see the application running at http://localhost:3000
-.
+Edit **`client/.env`**:
 
-Support
+```env
+VITE_PINATA_JWT=your_pinata_jwt_here
+```
 
-If you like this project, please leave a star ⭐️. This helps more people to know this project.
+Start the dev server:
+
+```bash
+npm run dev
+```
+
+Open the URL Vite prints (default **http://localhost:5173**). If the port is in use, Vite will choose another—check the terminal output.
+
+Other useful scripts:
+
+```bash
+npm run build    # production build → dist/
+npm run preview  # serve the production build locally
+npm test         # Vitest (client tests)
+```
+
+### 3. MetaMask
+
+- Add/import the **same network** you deployed to (e.g. Ganache custom RPC: `http://127.0.0.1:7545`).
+- Import at least one account that has ETH on that network (Ganache accounts work).
+- The **chain ID** in MetaMask must match the network where **`EHR`** was deployed so `EHR.json` contains a matching `networks[<id>].address`.
+
+---
+
+## Using the app
+
+1. Open the app (Vite dev URL). **Home (`/`)** is reachable without the in-app login flow; other routes expect you to **sign in with MetaMask** (see `client/src/App.jsx` + `AuthProvider`).
+2. **Doctor:** register as doctor on-chain from Home, then use **`/doctor`** to register patients, search by address, and upload records (requires **`VITE_PINATA_JWT`**).
+3. **Patient:** after a doctor has called `addPatient` for your address, use **`/patient`** to load your records.
+
+If Web3 init fails, the app shows an **error message and Retry** instead of hanging on “Loading…”.
+
+---
+
+## Environment variables
+
+| Variable | Location | Purpose |
+|----------|----------|---------|
+| `VITE_PINATA_JWT` | `client/.env` | Pinata **JWT** for `pinFileToIPFS` (see `client/src/ipfs.js`) |
+
+Only variables prefixed with **`VITE_`** are exposed to the browser by Vite. **Do not commit** real secrets; keep them in **`.env`** (gitignored).
+
+---
+
+## Smart contract (`EHR`)
+
+File: **`truffle/contracts/EHR.sol`**.
+
+- **`addDoctor()`** — any address can register as a doctor (demo-level trust model).
+- **`addPatient(address)`** — only a registered doctor.
+- **`addRecord(cid, fileName, patient)`** — only a doctor; appends to that patient’s record list.
+- **`getRecords(patient)`** — only if the caller is **that patient** or a **registered doctor** (patients cannot read other patients’ rows).
+
+After changing the contract, **recompile, migrate**, and ensure **`client/src/contracts/EHR.json`** is updated (again, Truffle writes there when using the default config).
+
+---
+
+## IPFS upload vs download
+
+- **Upload:** Pinata API from **`client/src/ipfs.js`** (needs `VITE_PINATA_JWT`).
+- **Download link:** record cards use a fixed gateway URL in **`client/src/components/Record.jsx`** (`https://med-chain.infura-ipfs.io/ipfs/<cid>`). CIDs from Pinata are still valid on public gateways; if a link fails, try another gateway or Pinata’s gateway for the same CID.
+
+---
+
+## Testing
+
+**Truffle / contract tests** (requires a node on **`127.0.0.1:7545`** or specify `--network`):
+
+```bash
+cd truffle
+npx truffle test
+```
+
+Tests live in **`truffle/test/ehr.test.js`** (access control for `getRecords`).
+
+**Client tests:**
+
+```bash
+cd client
+npm test
+```
+
+---
+
+## Security notes
+
+- **Pinata JWT in the client** is visible to anyone who uses your built site. Treat it as **demo-only**; for production, use a **small backend** that holds the secret and authenticates uploads.
+- **Doctor registration** on-chain is **permissionless** in this demo—real deployments would need admin/allowlisting or off-chain verification.
+- Rotate any JWT that was ever committed or shared publicly.
+
+---
+
+## Support
+
+If you find this project useful, consider leaving a star on the repository.

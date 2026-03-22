@@ -2,27 +2,27 @@ import { useContext, useState } from "react";
 import { Box, Card, CardContent, Typography, CircularProgress, Chip } from "@mui/material";
 import EthContext from "../contexts/EthContext/EthContext";
 import CustomButton from "./CustomButton";
-import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
+import useAlert from "../contexts/AlertContext/useAlert";
 
 const Register = () => {
   const { state: { contract, accounts } } = useContext(EthContext);
+  const { setAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
   const registerAsDoctor = async () => {
-    if (!contract || !accounts) {
-      alert("Wallet not connected correctly.");
+    if (!contract || !accounts?.length) {
+      setAlert("Wallet not connected correctly.", "error");
       return;
     }
     
     setLoading(true);
     try {
-      // Calls addDoctor() from EHR.sol
       await contract.methods.addDoctor().send({ from: accounts[0] });
-      alert("Registration Successful!");
+      setAlert("Registration successful.", "success");
       window.location.reload(); // Reloads to let EthProvider fetch the new 'doctor' role
     } catch (err) {
       console.error("Registration failed", err);
-      alert("Transaction failed or rejected.");
+      setAlert("Transaction failed or rejected.", "error");
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ const Register = () => {
       minHeight="100vh"
       width="100%"
       sx={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: "linear-gradient(160deg, rgba(15,118,110,0.14) 0%, rgba(15,23,42,0.06) 100%)",
         p: 2,
       }}
     >
@@ -46,43 +46,35 @@ const Register = () => {
           maxWidth: 500,
           p: 4,
           borderRadius: "16px",
-          background: 'linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%)',
-          boxShadow: '0 20px 50px rgba(102, 126, 234, 0.2)',
-          animation: 'slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-          '@keyframes slideUp': {
-            from: { opacity: 0, transform: 'translateY(40px)' },
-            to: { opacity: 1, transform: 'translateY(0)' },
-          },
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
         }}
       >
         <CardContent sx={{ textAlign: 'center', p: 0 }}>
-          {/* Header */}
           <Box mb={4}>
             <Typography
               variant="h3"
               sx={{
                 fontWeight: 800,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: "linear-gradient(135deg, #0f766e 0%, #115e59 100%)",
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 2,
               }}
             >
-              🏥 Sanjeevani
+              Sanjeevani
             </Typography>
             <Typography variant="body1" color="textSecondary" sx={{ fontSize: '1.05rem', fontWeight: 500 }}>
               Healthcare on the Blockchain
             </Typography>
           </Box>
 
-          {/* Status Section */}
           <Box
             sx={{
               p: 3,
               borderRadius: '12px',
-              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)',
-              border: '2px solid rgba(102, 126, 234, 0.1)',
+              background: "linear-gradient(135deg, rgba(15,118,110,0.08) 0%, rgba(20,184,166,0.08) 100%)",
+              border: "1px solid rgba(15,118,110,0.15)",
               mb: 4,
             }}
           >
@@ -94,7 +86,7 @@ const Register = () => {
               sx={{
                 fontFamily: 'monospace',
                 fontWeight: 600,
-                color: '#667eea',
+                color: "#115e59",
                 wordBreak: 'break-all',
                 mb: 2,
               }}
@@ -113,7 +105,6 @@ const Register = () => {
             />
           </Box>
 
-          {/* Registration Info */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2, lineHeight: 1.8 }}>
               You need to register as a Doctor to manage patient records on Sanjeevani.
@@ -123,16 +114,14 @@ const Register = () => {
             </Typography>
           </Box>
 
-          {/* Register Button */}
           <Box sx={{ position: 'relative' }}>
             <CustomButton
               text={loading ? "Registering..." : "Register as Doctor"}
               handleClick={registerAsDoctor}
-              disabled={loading || !contract || !accounts}
+              disabled={loading || !contract || !accounts?.length}
             />
           </Box>
 
-          {/* Help Text */}
           <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 3 }}>
             Need help? Make sure MetaMask is connected and you have enough ETH for gas fees.
           </Typography>

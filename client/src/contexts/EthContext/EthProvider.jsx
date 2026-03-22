@@ -41,10 +41,26 @@ const EthProvider = ({ children }) => {
 
       dispatch({
         type: actions.init,
-        data: { artifact, web3, accounts, networkID, contract, role, loading: false },
+        data: {
+          artifact,
+          web3,
+          accounts,
+          networkID,
+          contract,
+          role,
+          loading: false,
+          initError: null,
+        },
       });
     } catch (err) {
       console.error(err);
+      dispatch({
+        type: actions.init,
+        data: {
+          loading: false,
+          initError: err?.message || "Failed to connect to the blockchain",
+        },
+      });
     }
   }, []);
 
@@ -55,11 +71,20 @@ const EthProvider = ({ children }) => {
         init(artifact.default || artifact);
       } catch (err) {
         console.error(err);
+        dispatch({
+          type: actions.init,
+          data: {
+            loading: false,
+            initError:
+              err?.message ||
+              "Could not load EHR.json. Run Truffle migrate and ensure client/src/contracts/EHR.json exists.",
+          },
+        });
       }
     };
 
     tryInit();
-  }, [init]);
+  }, [init, dispatch]);
 
   useEffect(() => {
     const handleChange = () => init(state.artifact);
