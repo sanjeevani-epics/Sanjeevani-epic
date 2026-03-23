@@ -65,7 +65,12 @@ contract EHR {
     emit RecordAdded(_cid, _patientId, msg.sender);
   } 
 
-  function getRecords(address _patientId) public view senderExists patientExists(_patientId) returns (Record[] memory) {
+  function getRecords(address _patientId) public view patientExists(_patientId) returns (Record[] memory) {
+    // Doctors may view any patient; patients may only view their own records (senderExists alone was insufficient).
+    require(
+      doctors[msg.sender].id == msg.sender || msg.sender == _patientId,
+      "Not authorized to view these records"
+    );
     return patients[_patientId].records;
   } 
 

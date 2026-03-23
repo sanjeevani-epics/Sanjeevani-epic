@@ -5,11 +5,7 @@ import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import { useDropzone } from 'react-dropzone';
 import CustomButton from '../../components/CustomButton';
-import useAlert from '../../contexts/AlertContext/useAlert';
-
-// Wrap the component in forwardRef to fix the MUI Modal warning
 const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }, ref) => {
-  const { setAlert } = useAlert();
   const [file, setFile] = useState(null);
   const [buffer, setBuffer] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -24,7 +20,6 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
     const reader = new FileReader();
     reader.readAsArrayBuffer(selectedFile);
     reader.onloadend = () => {
-      // Use the global Buffer (provided by your vite-plugin-node-polyfills)
       const buf = Buffer.from(reader.result);
       setBuffer(buf);
     };
@@ -66,18 +61,14 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
             width: { xs: '90%', sm: '60%', md: '50%' },
             p: 4,
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
-            border: '2px solid rgba(0, 121, 107, 0.1)',
-            animation: 'slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            '@keyframes slideUp': {
-              from: { opacity: 0, transform: 'translateY(40px)' },
-              to: { opacity: 1, transform: 'translateY(0)' },
-            },
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            border: '1px solid rgba(15, 118, 110, 0.15)',
           }}
         >
           <IconButton
             onClick={handleClose}
             disabled={isUploading}
+            aria-label="Close upload dialog"
             sx={{ 
               position: 'absolute', 
               top: 16, 
@@ -94,7 +85,7 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
 
           <Box sx={{ mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 700, color: '#00796b', mb: 1 }}>
-              📤 Upload Medical Record
+              Upload Medical Record
             </Typography>
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.9rem' }}>
               Select a file to upload and secure on IPFS
@@ -126,7 +117,7 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
             <Box sx={{ position: 'relative', zIndex: 1 }}>
               <CloudUploadRoundedIcon sx={{ fontSize: 48, color: isDragActive ? '#00796b' : 'rgba(0, 121, 107, 0.5)', mb: 2, transition: 'all 0.3s ease' }} />
               <Typography variant="h6" sx={{ fontWeight: 600, color: '#00796b', mb: 1 }}>
-                {isDragActive ? '📥 Drop file here' : '📁 Drag & drop your file'}
+                {isDragActive ? 'Drop file here' : 'Drag and drop your file'}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 or click to browse

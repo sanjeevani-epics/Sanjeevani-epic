@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import CloudDownloadRoundedIcon from "@mui/icons-material/CloudDownloadRounded";
-import { grey } from "@mui/material/colors";
 import dayjs from "dayjs";
 
 const Record = ({ record }) => {
@@ -18,13 +17,12 @@ const Record = ({ record }) => {
   return (
     <Card sx={{
       background: 'linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%)',
-      border: '1px solid rgba(0, 121, 107, 0.1)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      border: "1px solid rgba(15, 118, 110, 0.12)",
+      boxShadow: "0 4px 14px rgba(15, 23, 42, 0.08)",
+      transition: "all 0.2s ease",
       '&:hover': {
-        boxShadow: '0 12px 24px rgba(0, 121, 107, 0.15)',
-        transform: 'translateY(-4px)',
-        background: 'linear-gradient(135deg, #f5f5f5 0%, #f0f0f0 100%)',
+        boxShadow: "0 10px 20px rgba(15, 118, 110, 0.15)",
+        transform: "translateY(-1px)",
       },
     }}>
       <CardContent>
@@ -46,7 +44,7 @@ const Record = ({ record }) => {
           <Grid item xs={12} sm={3}>
             <Box display="flex" flexDirection="column">
               <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>
-                📄 File Name
+                File Name
               </Typography>
               <Typography variant="body2" noWrap sx={{ fontWeight: 600, mt: 0.5 }}>
                 {name}
@@ -57,7 +55,7 @@ const Record = ({ record }) => {
           <Grid item xs={12} sm={4}>
             <Box display="flex" flexDirection="column">
               <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>
-                👨‍⚕️ Doctor Address
+                Doctor Address
               </Typography>
               <Typography variant="body2" noWrap sx={{ fontWeight: 500, mt: 0.5, fontFamily: 'monospace', fontSize: '0.85rem' }}>
                 {`${doctorId.slice(0, 6)}...${doctorId.slice(-4)}`}
@@ -68,7 +66,7 @@ const Record = ({ record }) => {
           <Grid item xs={12} sm={2}>
             <Box display="flex" flexDirection="column">
               <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>
-                ⏰ Date Created
+                Date Created
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
                 {dayjs.unix(timestamp).format("MMM DD, YYYY")}
@@ -84,15 +82,16 @@ const Record = ({ record }) => {
               style={{ textDecoration: 'none' }}
             >
               <IconButton
+                aria-label="Download record from IPFS"
                 sx={{
-                  background: 'linear-gradient(135deg, #00796b 0%, #004d40 100%)',
+                  background: "linear-gradient(135deg, #0f766e 0%, #115e59 100%)",
                   color: 'white',
                   width: 44,
                   height: 44,
-                  transition: 'all 0.3s ease',
+                  transition: "all 0.2s ease",
                   '&:hover': {
-                    transform: 'scale(1.1)',
-                    boxShadow: '0 6px 16px rgba(0, 121, 107, 0.3)',
+                    transform: "scale(1.05)",
+                    boxShadow: "0 6px 16px rgba(15, 118, 110, 0.25)",
                   },
                 }}
               >

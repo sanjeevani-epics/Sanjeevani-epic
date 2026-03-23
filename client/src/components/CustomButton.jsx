@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Typography } from "@mui/material";
-import { grey, teal } from "@mui/material/colors";
+import { grey } from "@mui/material/colors";
 
 const CustomButton = ({ text, handleClick, disabled = false, startIcon, children }) => {
   return (
@@ -12,49 +12,35 @@ const CustomButton = ({ text, handleClick, disabled = false, startIcon, children
       sx={{
         background: disabled 
           ? grey[400] 
-          : 'linear-gradient(135deg, #00796b 0%, #00bcd4 100%)',
+          : "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)",
         textTransform: "none",
-        padding: "12px 28px",
-        borderRadius: "8px",
+        padding: "10px 22px",
+        borderRadius: "10px",
         fontWeight: 600,
-        fontSize: "0.95rem",
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: disabled ? 'none' : '0 4px 12px rgba(0, 121, 107, 0.3)',
+        fontSize: "0.9rem",
+        transition: "all 0.2s ease",
+        boxShadow: disabled ? "none" : "0 4px 12px rgba(15, 118, 110, 0.25)",
         position: 'relative',
         overflow: 'hidden',
-        "&::before": {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: '-100%',
-          width: '100%',
-          height: '100%',
-          background: 'rgba(255, 255, 255, 0.2)',
-          transition: 'left 0.5s ease',
-          zIndex: 0,
-        },
-        "&:hover::before": disabled ? {} : {
-          left: '100%',
-        },
         "&:hover": disabled ? {} : {
-          transform: 'translateY(-3px)',
-          boxShadow: '0 8px 20px rgba(0, 121, 107, 0.4)',
-          background: 'linear-gradient(135deg, #004d40 0%, #0097a7 100%)',
+          transform: "translateY(-1px)",
+          boxShadow: "0 8px 18px rgba(15, 118, 110, 0.3)",
+          background: "linear-gradient(135deg, #115e59 0%, #0f766e 100%)",
         },
         "&:active": disabled ? {} : {
-          transform: 'translateY(-1px)',
-          boxShadow: '0 4px 12px rgba(0, 121, 107, 0.3)',
+          transform: "translateY(0)",
+          boxShadow: "0 4px 10px rgba(15, 118, 110, 0.25)",
         },
         "&:disabled": {
           opacity: 0.6,
-          cursor: 'not-allowed',
+          cursor: "not-allowed",
         },
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         gap: 1,
       }}
     >
-      <Typography variant="button" color="white" sx={{ fontWeight: 600, position: 'relative', zIndex: 1 }}>
+      <Typography variant="button" color="white" sx={{ fontWeight: 600, position: "relative", zIndex: 1 }}>
         {text}
       </Typography>
     </Button>

@@ -11,6 +11,7 @@ export const initialState = {
   contract: null,
   role: "unknown",
   loading: true,
+  initError: null,
 };
 
 export const reducer = (state, action) => {

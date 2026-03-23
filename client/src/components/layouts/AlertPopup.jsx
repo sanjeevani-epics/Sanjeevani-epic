@@ -65,26 +65,23 @@ const AlertPopup = () => {
           position: "fixed",
           top: 16,
           zIndex: 1400,
-          animation: 'slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          '@keyframes slideDown': {
-            from: { opacity: 0, transform: 'translateY(-30px)' },
-            to: { opacity: 1, transform: 'translateY(0)' },
-          },
         }}
       >
         <Alert
           icon={getIcon()}
           severity={type}
+          role="status"
+          aria-live="polite"
           sx={{
             width: { xs: "90%", sm: "auto" },
             minWidth: { sm: 350 },
             maxWidth: 550,
-            paddingRight: 3,
+            pr: 3,
             paddingY: 1.5,
             paddingX: 2,
-            borderRadius: "12px",
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-            border: 'none',
+            borderRadius: "10px",
+            boxShadow: "0 10px 24px rgba(15, 23, 42, 0.15)",
+            border: "none",
             ...getBackgroundStyle(),
           }}
         >

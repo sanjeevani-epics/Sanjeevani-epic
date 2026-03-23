@@ -3,7 +3,6 @@ import {
   Box,
   Card,
   CardContent,
-  Divider,
   FormControl,
   Modal,
   TextField,
@@ -19,9 +18,8 @@ import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import useEth from "../../contexts/EthContext/useEth";
 import useAlert from "../../contexts/AlertContext/useAlert";
 import AddRecordModal from "./AddRecordModal";
-import uploadToIPFS from "../../ipfs"; 
+import uploadToIPFS from "../../ipfs";
 import Record from "../../components/Record";
-
 
 const Doctor = () => {
   const {
@@ -36,6 +34,10 @@ const Doctor = () => {
   const [addRecord, setAddRecord] = useState(false);
 
   const searchPatient = async () => {
+    if (!contract || !accounts?.length) {
+      setAlert("Connect MetaMask and ensure the contract is deployed on this network.", "error");
+      return;
+    }
     if (!/^(0x)?[0-9a-f]{40}$/i.test(searchPatientAddress)) {
       setAlert("Please enter a valid wallet address", "error");
       return;
@@ -57,10 +59,15 @@ const Doctor = () => {
       }
     } catch (err) {
       console.error(err);
+      setAlert(err?.message || "Could not search for patient. Check the network and try again.", "error");
     }
   };
 
   const registerPatient = async () => {
+    if (!contract || !accounts?.length) {
+      setAlert("Connect MetaMask and ensure the contract is deployed on this network.", "error");
+      return;
+    }
     if (!/^(0x)?[0-9a-f]{40}$/i.test(addPatientAddress)) {
       setAlert("Please enter a valid wallet address", "error");
       return;
@@ -77,42 +84,32 @@ const Doctor = () => {
     }
   };
 
-  // At the top of Doctor.jsx, change the import name for clarity
-
-
-// Inside the Doctor component:
-const addRecordCallback = useCallback(
-  async (buffer, fileName, patientAddress) => {
-    if (!patientAddress) {
-      setAlert("Please search for a patient first", "error");
-      return;
-    }
-    try {
-      // 1. Upload to Pinata and get the CID
-      const ipfsHash = await uploadToIPFS(buffer, fileName);
-      
-      if (ipfsHash) {
-        // 2. Save the CID to the Ethereum Blockchain
-        await contract.methods
-          .addRecord(ipfsHash, fileName, patientAddress)
-          .send({ from: accounts[0] });
-
-        setAlert("New record uploaded and secured on blockchain", "success");
-        setAddRecord(false);
-
-        // 3. Refresh the record list
-        const recs = await contract.methods
-          .getRecords(patientAddress)
-          .call({ from: accounts[0] });
-        setRecords(recs);
+  const addRecordCallback = useCallback(
+    async (buffer, fileName, patientAddress) => {
+      if (!patientAddress) {
+        setAlert("Please search for a patient first", "error");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      setAlert("Record upload failed. Check console for details.", "error");
-    }
-  },
-  [accounts, contract, setAlert]
-);
+      try {
+        const ipfsHash = await uploadToIPFS(buffer, fileName);
+        if (ipfsHash) {
+          await contract.methods
+            .addRecord(ipfsHash, fileName, patientAddress)
+            .send({ from: accounts[0] });
+          setAlert("New record uploaded and secured on blockchain", "success");
+          setAddRecord(false);
+          const recs = await contract.methods
+            .getRecords(patientAddress)
+            .call({ from: accounts[0] });
+          setRecords(recs);
+        }
+      } catch (err) {
+        console.error(err);
+        setAlert("Record upload failed. Check console for details.", "error");
+      }
+    },
+    [accounts, contract, setAlert]
+  );
 
   if (loading) {
     return (
@@ -125,11 +122,22 @@ const addRecordCallback = useCallback(
     );
   }
 
-  if (!accounts) {
+  if (!accounts?.length) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
         <Typography variant="h6">
           Open your MetaMask wallet to get connected, then refresh this page
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!contract) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5} px={2}>
+        <Typography variant="h6" textAlign="center">
+          No EHR contract on this network. Deploy with Truffle on the chain MetaMask is using, then
+          refresh.
         </Typography>
       </Box>
     );
@@ -154,8 +162,8 @@ const addRecordCallback = useCallback(
   }
 
   return (
-    <Box display="flex" justifyContent="center" width="100%" sx={{ minHeight: '100vh', p: { xs: 1, md: 2 } }}>
-      <Box width={{ xs: "100%", sm: "90%", md: "70%" }}>
+    <Box display="flex" justifyContent="center" width="100%" sx={{ py: 1 }}>
+      <Box width={{ xs: "100%", md: "90%" }}>
         <Modal open={addRecord} onClose={() => setAddRecord(false)}>
           <AddRecordModal
             handleClose={() => setAddRecord(false)}
@@ -164,28 +172,25 @@ const addRecordCallback = useCallback(
           />
         </Modal>
 
-        {/* Search Section */}
         <Card sx={{
-          mb: 4,
-          background: 'linear-gradient(135deg, #00796b 0%, #004d40 100%)',
-          color: 'white',
-          boxShadow: 6,
-          animation: 'fadeInDown 0.6s ease-in-out',
-          '@keyframes fadeInDown': {
-            from: { opacity: 0, transform: 'translateY(-20px)' },
-            to: { opacity: 1, transform: 'translateY(0)' },
-          },
+          mb: 3,
+          background: "linear-gradient(135deg, #0f766e 0%, #115e59 100%)",
+          color: "white",
         }}>
           <CardContent>
-            <Typography variant="h5" mb={3} sx={{ fontWeight: 600 }}>
-              🔍 Search Patient Records
+            <Typography variant="h5" mb={1.5}>
+              Search Patient Records
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
+              Find a patient by wallet address to review records and upload new files.
             </Typography>
 
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems="flex-end" gap={2}>
+            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "flex-end" }} gap={2}>
               <FormControl fullWidth>
                 <TextField
                   variant="outlined"
-                  placeholder="Enter patient wallet address (0x...)"
+                  label="Patient wallet address"
+                  placeholder="0x..."
                   value={searchPatientAddress}
                   onChange={(e) => setSearchPatientAddress(e.target.value)}
                   size="small"
@@ -193,11 +198,14 @@ const addRecordCallback = useCallback(
                     '& .MuiInputBase-root': {
                       backgroundColor: 'rgba(255,255,255,0.15)',
                       color: 'white',
-                      borderRadius: 1,
+                      borderRadius: 2,
                     },
                     '& .MuiInputBase-input::placeholder': {
                       color: 'rgba(255,255,255,0.7)',
                       opacity: 1,
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "rgba(255,255,255,0.8)",
                     },
                   }}
                 />
@@ -208,27 +216,20 @@ const addRecordCallback = useCallback(
               </CustomButton>
 
               {patientExist && (
-                <Chip label="Patient Found ✓" color="success" variant="outlined" sx={{ color: 'white', borderColor: 'white' }} />
+                <Chip label="Patient Found" color="success" variant="outlined" sx={{ color: "white", borderColor: "white", height: 40 }} />
               )}
             </Box>
           </CardContent>
         </Card>
 
-        {/* Records Section */}
         {patientExist && (
           <Card sx={{
-            mb: 4,
-            boxShadow: 4,
-            animation: 'fadeInUp 0.6s ease-in-out 0.2s both',
-            '@keyframes fadeInUp': {
-              from: { opacity: 0, transform: 'translateY(20px)' },
-              to: { opacity: 1, transform: 'translateY(0)' },
-            },
+            mb: 3,
           }}>
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  📋 Patient Records ({records.length})
+                <Typography variant="h6">
+                  Patient Records ({records.length})
                 </Typography>
                 <CustomButton text="+ New Record" handleClick={() => setAddRecord(true)}>
                   <CloudUploadRoundedIcon style={{ color: "white" }} />
@@ -237,20 +238,14 @@ const addRecordCallback = useCallback(
 
               {records.length === 0 ? (
                 <Box display="flex" justifyContent="center" py={5}>
-                  <Typography variant="body1" color="textSecondary">
+                  <Typography variant="body1" color="text.secondary">
                     No records found for this patient
                   </Typography>
                 </Box>
               ) : (
                 <Box display="flex" flexDirection="column" gap={2}>
                   {records.map((record, index) => (
-                    <Box key={index} sx={{
-                      animation: `fadeIn 0.4s ease-in-out ${0.3 + index * 0.1}s both`,
-                      '@keyframes fadeIn': {
-                        from: { opacity: 0 },
-                        to: { opacity: 1 },
-                      },
-                    }}>
+                    <Box key={index}>
                       <Record record={record} />
                     </Box>
                   ))}
@@ -260,27 +255,24 @@ const addRecordCallback = useCallback(
           </Card>
         )}
 
-        {/* Register Patient Section */}
         <Card sx={{
-          background: 'linear-gradient(135deg, #0097a7 0%, #00695c 100%)',
-          color: 'white',
-          boxShadow: 6,
-          animation: 'fadeInUp 0.6s ease-in-out 0.4s both',
-          '@keyframes fadeInUp': {
-            from: { opacity: 0, transform: 'translateY(20px)' },
-            to: { opacity: 1, transform: 'translateY(0)' },
-          },
+          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          color: "white",
         }}>
           <CardContent>
-            <Typography variant="h5" mb={3} sx={{ fontWeight: 600 }}>
-              ➕ Register New Patient
+            <Typography variant="h5" mb={1.5}>
+              Register New Patient
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.85, mb: 3 }}>
+              Add a new patient wallet so they can receive records on-chain.
             </Typography>
 
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems="flex-end" gap={2}>
+            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "flex-end" }} gap={2}>
               <FormControl fullWidth>
                 <TextField
                   variant="outlined"
-                  placeholder="Enter patient wallet address (0x...)"
+                  label="Patient wallet address"
+                  placeholder="0x..."
                   value={addPatientAddress}
                   onChange={(e) => setAddPatientAddress(e.target.value)}
                   size="small"
@@ -293,6 +285,9 @@ const addRecordCallback = useCallback(
                     '& .MuiInputBase-input::placeholder': {
                       color: 'rgba(255,255,255,0.7)',
                       opacity: 1,
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "rgba(255,255,255,0.8)",
                     },
                   }}
                 />
