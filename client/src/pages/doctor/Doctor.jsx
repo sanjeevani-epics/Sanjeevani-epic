@@ -85,7 +85,7 @@ const Doctor = () => {
   };
 
   const addRecordCallback = useCallback(
-    async (buffer, fileName, patientAddress) => {
+    async (buffer, fileName, patientAddress, metadataStr) => {
       if (!patientAddress) {
         setAlert("Please search for a patient first", "error");
         return;
@@ -94,7 +94,7 @@ const Doctor = () => {
         const ipfsHash = await uploadToIPFS(buffer, fileName);
         if (ipfsHash) {
           await contract.methods
-            .addRecord(ipfsHash, fileName, patientAddress)
+            .addRecord(ipfsHash, fileName, patientAddress, metadataStr)
             .send({ from: accounts[0] });
           setAlert("New record uploaded and secured on blockchain", "success");
           setAddRecord(false);

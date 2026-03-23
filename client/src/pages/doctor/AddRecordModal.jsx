@@ -1,5 +1,5 @@
 import React, { useState, useCallback, forwardRef } from 'react';
-import { Box, Chip, IconButton, Typography, Paper, Fade } from '@mui/material';
+import { Box, Chip, IconButton, Typography, Paper, Fade, TextField } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
@@ -9,6 +9,10 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
   const [file, setFile] = useState(null);
   const [buffer, setBuffer] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  
+  const [category, setCategory] = useState('');
+  const [hospital, setHospital] = useState('');
+  const [notes, setNotes] = useState('');
 
   const onDrop = useCallback((acceptedFiles) => {
     if (!acceptedFiles || acceptedFiles.length === 0) return;
@@ -33,7 +37,8 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
   const handleUploadClick = async () => {
     setIsUploading(true);
     try {
-      await handleUpload(buffer, file.name, patientAddress);
+      const metadata = JSON.stringify({ category, hospital, notes });
+      await handleUpload(buffer, file.name, patientAddress, metadata);
     } finally {
       setIsUploading(false);
     }
@@ -90,6 +95,14 @@ const AddRecordModal = forwardRef(({ handleClose, handleUpload, patientAddress }
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.9rem' }}>
               Select a file to upload and secure on IPFS
             </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField fullWidth size="small" label="Category / Diagnosis" value={category} onChange={(e) => setCategory(e.target.value)} />
+            <TextField fullWidth size="small" label="Hospital / Clinic" value={hospital} onChange={(e) => setHospital(e.target.value)} />
+          </Box>
+          <Box sx={{ mb: 3 }}>
+            <TextField fullWidth size="small" label="Clinical Notes" value={notes} onChange={(e) => setNotes(e.target.value)} multiline rows={2} />
           </Box>
 
           <Box

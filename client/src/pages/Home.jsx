@@ -6,17 +6,26 @@ import {
   CircularProgress,
   Card,
   CardContent,
+  Button,
+  Grid,
+  Stack,
+  Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import VideoCover from "react-video-cover";
 import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
-import CustomButton from "../components/CustomButton";
+import HealthAndSafetyRoundedIcon from "@mui/icons-material/HealthAndSafetyRounded";
+import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
+import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
+import HubRoundedIcon from "@mui/icons-material/HubRounded";
+import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
+import WalletRoundedIcon from "@mui/icons-material/WalletRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import useEth from "../contexts/EthContext/useEth";
 import useAuth from "../contexts/AuthContext/useAuth";
 import useAlert from "../contexts/AlertContext/useAlert";
-import BackgroundVideo from "../assets/BackgroundVideo.mp4";
 import logo from "../assets/LogoTealBG.jpg";
 import "../App.css";
 
@@ -27,6 +36,7 @@ const Home = () => {
   } = useEth();
   const navigate = useNavigate();
   const { setAlert } = useAlert();
+  const { user, login } = useAuth();
 
   const registerDoctor = async () => {
     if (!contract) {
@@ -48,79 +58,10 @@ const Home = () => {
       setAlert(err?.message || "Registration failed.", "error");
     }
   };
-
-  const { user, login } = useAuth();
-
   const canRegisterDoctor = Boolean(contract && accounts?.length);
-
-  const ActionSection = () => {
-    // If user is not logged in, show prominent login CTA
-    if (!user) {
-      return (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="h5" color="white" mb={2}>
-            Welcome — connect your wallet to manage records securely
-          </Typography>
-          <CustomButton text="Login with MetaMask" handleClick={login}>
-            <AccountBalanceWalletRoundedIcon style={{ color: "white" }} />
-          </CustomButton>
-          <Box mt={3}>
-            <Typography variant="body2" color="white">Future features preview: secure sharing, analytics, doctor directory (coming soon)</Typography>
-          </Box>
-        </Box>
-      );
-    }
-
-    if (!accounts?.length) {
-      return (
-        <Typography variant="h5" color="white">
-          Open your MetaMask wallet to get connected, then refresh this page
-        </Typography>
-      );
-    }
-
-    if (role === "unknown") {
-      return (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Box mb={2}>
-            <CustomButton
-              text="Doctor Register"
-              handleClick={registerDoctor}
-              disabled={!canRegisterDoctor}
-            >
-              <PersonAddAlt1RoundedIcon style={{ color: "white" }} />
-            </CustomButton>
-          </Box>
-          {!contract && (
-            <Typography variant="body2" color="rgba(255,255,255,0.85)" textAlign="center" mb={1}>
-              Contract not deployed on this network — switch MetaMask to your Ganache/local chain or
-              deploy EHR and refresh.
-            </Typography>
-          )}
-          <Typography variant="h5" color="white">
-            If you are a patient, ask your doctor to register for you
-          </Typography>
-        </Box>
-      );
-    }
-
-    if (role === "patient") {
-      return (
-        <CustomButton text="Patient Portal" handleClick={() => navigate("/patient")}>
-          <LoginRoundedIcon style={{ color: "white" }} />
-        </CustomButton>
-      );
-    }
-
-    if (role === "doctor") {
-      return (
-        <CustomButton text="Doctor Portal" handleClick={() => navigate("/doctor")}>
-          <LoginRoundedIcon style={{ color: "white" }} />
-        </CustomButton>
-      );
-    }
-
-    return null;
+  const scrollToHowItWorks = () => {
+    const section = document.getElementById("how-it-works");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   if (loading) {
@@ -134,65 +75,276 @@ const Home = () => {
     );
   }
 
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      width="100%"
-      minHeight="calc(100vh - 96px)"
-      id="background"
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          overflow: "hidden",
-          top: 0,
-          left: 0,
-          zIndex: -1,
-        }}
+  const renderPrimaryAction = () => {
+    if (!user) {
+      return (
+        <Button
+          variant="contained"
+          size="large"
+          onClick={login}
+          startIcon={<AccountBalanceWalletRoundedIcon />}
+          sx={{ px: 3, py: 1.2 }}
+        >
+          Connect MetaMask
+        </Button>
+      );
+    }
+
+    if (!accounts?.length) {
+      return (
+        <Typography color="warning.main" variant="body2">
+          MetaMask account not detected. Unlock wallet and refresh.
+        </Typography>
+      );
+    }
+
+    if (role === "doctor") {
+      return (
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => navigate("/doctor")}
+          startIcon={<LoginRoundedIcon />}
+          sx={{ px: 3, py: 1.2 }}
+        >
+          Go to Doctor Dashboard
+        </Button>
+      );
+    }
+
+    if (role === "patient") {
+      return (
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => navigate("/patient")}
+          startIcon={<LoginRoundedIcon />}
+          sx={{ px: 3, py: 1.2 }}
+        >
+          Go to Patient Dashboard
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant="contained"
+        size="large"
+        onClick={registerDoctor}
+        disabled={!canRegisterDoctor}
+        startIcon={<PersonAddAlt1RoundedIcon />}
+        sx={{ px: 3, py: 1.2 }}
       >
-        <VideoCover
-          videoOptions={{ src: BackgroundVideo, autoPlay: true, loop: true, muted: true }}
-        />
+        Register as Doctor
+      </Button>
+    );
+  };
+
+  return (
+    <Box className="home-page-root">
+      <Box className="home-hero">
+        <Box className="home-hero-glow" />
+        <Stack spacing={2} alignItems={{ xs: "flex-start", md: "center" }} textAlign={{ xs: "left", md: "center" }}>
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <img src={logo} alt="sanjeevani-logo" style={{ height: 46, width: 46, borderRadius: 8 }} />
+            <Typography variant="h6" fontWeight={700}>
+              Sanjeevani
+            </Typography>
+          </Box>
+          <Typography variant="h3" sx={{ fontWeight: 800, maxWidth: 920 }}>
+            Secure, tamper-evident medical records for doctors and patients
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 780 }}>
+            Sanjeevani is a blockchain EMR demo where doctors upload records to IPFS and store verified
+            references on-chain, while patients access only their authorized history.
+          </Typography>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+            {renderPrimaryAction()}
+            <Button variant="outlined" size="large" onClick={scrollToHowItWorks}>
+              Learn How It Works
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Chip icon={<HubRoundedIcon />} label="Ethereum + MetaMask" />
+            <Chip icon={<CloudDoneRoundedIcon />} label="IPFS Storage" />
+            <Chip icon={<SecurityRoundedIcon />} label="Role-aware Access" />
+          </Stack>
+        </Stack>
       </Box>
 
-      <Box
-        id="home-page-box"
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        width={{ xs: "100%", md: "85%" }}
-        maxWidth={900}
-        p={{ xs: 2.5, md: 5 }}
-      >
-        <Card sx={{ width: "100%", backgroundColor: "rgba(15, 23, 42, 0.68)", borderColor: "rgba(255,255,255,0.2)" }}>
-          <CardContent sx={{ py: 5 }}>
-            <Box display="flex" justifyContent="center">
-              <img src={logo} alt="med-chain-logo" style={{ height: 50 }} />
-            </Box>
-            <Box mt={2} mb={3} textAlign="center">
-              <Typography variant="h4" color="white">
-                Own Your Health
+      <Grid container spacing={2.5} sx={{ mb: 5 }}>
+        <Grid item xs={12} md={4}>
+          <Card className="home-info-card">
+            <CardContent>
+              <HealthAndSafetyRoundedIcon color="primary" />
+              <Typography variant="h6" mt={1} mb={1}>
+                Why this matters
               </Typography>
-              <Typography variant="body1" color="rgba(255,255,255,0.9)" mt={1}>
-                Trusted health records for doctors and patients, secured with blockchain.
+              <Typography color="text.secondary">
+                Medical data is often fragmented across clinics and systems. Sanjeevani improves trust,
+                continuity, and traceability.
               </Typography>
-            </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card className="home-info-card">
+            <CardContent>
+              <VerifiedUserRoundedIcon color="primary" />
+              <Typography variant="h6" mt={1} mb={1}>
+                Ownership and consent
+              </Typography>
+              <Typography color="text.secondary">
+                Access checks in the contract ensure only authorized doctors or the patient can read
+                records.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card className="home-info-card">
+            <CardContent>
+              <CloudDoneRoundedIcon color="primary" />
+              <Typography variant="h6" mt={1} mb={1}>
+                Decentralized integrity
+              </Typography>
+              <Typography color="text.secondary">
+                Files are pinned on IPFS and content references are stored on-chain for auditable medical
+                history.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-            <ActionSection />
+      <Card id="how-it-works" className="home-section-card">
+        <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+          <Typography variant="h5" fontWeight={700} mb={2.5}>
+            How it works
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box className="home-step-box">
+                <WalletRoundedIcon color="primary" />
+                <Typography fontWeight={600}>1. Connect wallet</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Sign in using MetaMask on the same network as the deployed EHR contract.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box className="home-step-box">
+                <GroupsRoundedIcon color="primary" />
+                <Typography fontWeight={600}>2. Register patient</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  A doctor adds a patient wallet to enable secure record management.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box className="home-step-box">
+                <DescriptionRoundedIcon color="primary" />
+                <Typography fontWeight={600}>3. Upload record</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  The file is uploaded to IPFS and its CID with metadata is written to blockchain.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box className="home-step-box">
+                <SecurityRoundedIcon color="primary" />
+                <Typography fontWeight={600}>4. Access authorized data</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Doctors and the patient can view permitted records through secure role checks.
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+          <Typography variant="caption" color="text.secondary" mt={2.5} display="block">
+            Demo note: use MetaMask with the same chain where EHR is deployed for actions to succeed.
+          </Typography>
+        </CardContent>
+      </Card>
 
-            <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
-              <Typography variant="body2" color="white">
-                Powered by Ethereum and IPFS
+      <Grid container spacing={2.5} sx={{ my: 4.5 }}>
+        <Grid item xs={12} md={6}>
+          <Card className="home-role-card">
+            <CardContent>
+              <Typography variant="h6" mb={1}>
+                Doctor
               </Typography>
-            </Box>
+              <Typography color="text.secondary" mb={2.5}>
+                Search patient wallets, register new patients, and upload records to IPFS with on-chain
+                references.
+              </Typography>
+              <Button variant="contained" onClick={() => navigate("/doctor")}>
+                Open Doctor Page
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card className="home-role-card">
+            <CardContent>
+              <Typography variant="h6" mb={1}>
+                Patient
+              </Typography>
+              <Typography color="text.secondary" mb={2.5}>
+                View your own records in one place with transparent history and verifiable storage links.
+              </Typography>
+              <Button variant="outlined" onClick={() => navigate("/patient")}>
+                Open Patient Page
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {role === "unknown" && user && (
+        <Card className="home-notice-card" sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight={600} mb={0.8}>
+              Onboarding note
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              If you are a doctor, complete registration to start adding patients. If you are a patient,
+              ask your doctor to register your wallet address first.
+            </Typography>
+            {!contract && (
+              <Typography variant="body2" color="error.main" mt={1.2}>
+                Contract is not detected on this network. Switch MetaMask network and refresh.
+              </Typography>
+            )}
           </CardContent>
         </Card>
+      )}
+
+      <Card className="home-section-card">
+        <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+          <Typography variant="h5" fontWeight={700} mb={1.2}>
+            Security and limitations
+          </Typography>
+          <Typography color="text.secondary" mb={1}>
+            This project is a demonstration app. For production, sensitive upload credentials should be
+            handled by a backend service.
+          </Typography>
+          <Typography color="text.secondary" mb={1}>
+            Doctor registration is permissionless in this demo contract model. A stricter approval model
+            is recommended for real deployments.
+          </Typography>
+          <Typography color="text.secondary">
+            Stack: React, MUI, MetaMask, Web3.js, Truffle, Ethereum, and IPFS (Pinata).
+          </Typography>
+        </CardContent>
+      </Card>
+
+      <Box className="home-footer">
+        <Typography variant="body2" color="text.secondary">
+          Sanjeevani Epic - Blockchain EMR demo
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Powered by Ethereum and IPFS
+        </Typography>
       </Box>
     </Box>
   );

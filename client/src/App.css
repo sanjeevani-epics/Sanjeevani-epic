@@ -1,7 +1,65 @@
-#background {
-  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.6);
+.home-page-root {
+  width: 100%;
+  min-height: calc(100vh - 96px);
+  padding: 8px 0 24px;
 }
 
-/* #home-page-box {
-  background-color: rgba(255, 255, 255, 0.5);
-} */
+.home-hero {
+  position: relative;
+  border-radius: 16px;
+  padding: 40px 20px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #effcf9 0%, #f8fafc 52%, #ecfeff 100%);
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  overflow: hidden;
+}
+
+.home-hero-glow {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -140px;
+  top: -140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.2) 0%, rgba(20, 184, 166, 0) 70%);
+  pointer-events: none;
+}
+
+.home-info-card,
+.home-section-card,
+.home-role-card,
+.home-notice-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: none;
+  border-radius: 14px;
+}
+
+.home-step-box {
+  height: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.home-footer {
+  margin-top: 20px;
+  padding: 12px 0 8px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+@media (min-width: 900px) {
+  .home-page-root {
+    padding-top: 14px;
+  }
+
+  .home-hero {
+    padding: 56px 46px;
+  }
+}
