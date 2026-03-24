@@ -52,10 +52,7 @@ function AppContent() {
     return <Register />;
   }
 
-  if (path === "/") {
-    if (user && state.role === "doctor") return <Navigate to="/doctor" replace />;
-    if (user && state.role === "patient") return <Navigate to="/patient" replace />;
-  }
+ 
 
   return <div id="App">{content}</div>;
 }

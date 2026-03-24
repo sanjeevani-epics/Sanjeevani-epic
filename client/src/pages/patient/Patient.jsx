@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Box, Card, CardContent, Typography, Backdrop, CircularProgress,
   TextField, MenuItem, Select, FormControl, InputLabel, Button,
@@ -37,6 +37,21 @@ const Patient = () => {
   const [grantPurpose, setGrantPurpose] = useState("Consultation");
   const [grantDuration, setGrantDuration] = useState(86400); // Default 1 Day
   const [managingConsent, setManagingConsent] = useState(false);
+
+  const [pendingRequests, setPendingRequests] = useState([]);
+
+  const loadRequests = useCallback(() => {
+    if (!accounts?.length) return;
+    const key = `accessRequests_${accounts[0].toLowerCase()}`;
+    setPendingRequests(JSON.parse(localStorage.getItem(key)) || []);
+  }, [accounts]);
+
+  useEffect(() => {
+    loadRequests();
+    const handleStorage = () => loadRequests();
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [loadRequests]);
 
   useEffect(() => {
     if (!contract || !accounts?.length) {
@@ -120,6 +135,32 @@ const Patient = () => {
     } finally {
       setLoadingRecords(false);
     }
+  };
+
+  const approveRequest = async (docId) => {
+    setLoadingRecords(true);
+    try {
+      await contract.methods.grantAccess(docId, "Requested Access", 86400).send({ from: accounts[0] });
+      const key = `accessRequests_${accounts[0].toLowerCase()}`;
+      const existing = JSON.parse(localStorage.getItem(key)) || [];
+      const updated = existing.filter(req => req.doctorId.toLowerCase() !== docId.toLowerCase());
+      localStorage.setItem(key, JSON.stringify(updated));
+      loadRequests();
+      setManagingConsent(prev => !prev);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to grant access.");
+    } finally {
+      setLoadingRecords(false);
+    }
+  };
+
+  const denyRequest = (docId) => {
+    const key = `accessRequests_${accounts[0].toLowerCase()}`;
+    const existing = JSON.parse(localStorage.getItem(key)) || [];
+    const updated = existing.filter(req => req.doctorId.toLowerCase() !== docId.toLowerCase());
+    localStorage.setItem(key, JSON.stringify(updated));
+    loadRequests();
   };
 
   // --- Status Screens ---
@@ -206,6 +247,34 @@ const Patient = () => {
             </Card>
           </Grid>
         </Grid>
+
+        {pendingRequests.length > 0 && (
+          <Card sx={{ mb: 3, border: "1px solid #f59e0b", background: "#fffbeb", borderRadius: 2 }}>
+            <CardContent>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#d97706", mb: 2 }}>
+                Pending Doctor Access Requests ({pendingRequests.length})
+              </Typography>
+              <List disablePadding>
+                {pendingRequests.map((req, i) => (
+                  <ListItem key={i} sx={{ px: 0, py: 1, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, borderBottom: i < pendingRequests.length - 1 ? '1px solid #fcd34d' : 'none' }}>
+                    <Box mb={{ xs: 1, sm: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                        Doctor: {req.doctorId}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        Requested {new Date(req.timestamp).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Box display="flex" gap={1}>
+                      <Button size="small" variant="contained" color="success" onClick={() => approveRequest(req.doctorId)}>Approve</Button>
+                      <Button size="small" variant="outlined" color="error" onClick={() => denyRequest(req.doctorId)}>Deny</Button>
+                    </Box>
+                  </ListItem>
+                ))}
+              </List>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Consent & Access Control Section */}
         <Card sx={{ mb: 3, border: "1px solid rgba(15, 118, 110, 0.2)", borderRadius: 2 }}>
