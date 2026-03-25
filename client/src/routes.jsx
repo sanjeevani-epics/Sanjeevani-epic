@@ -4,6 +4,7 @@ import AlertPopup from './components/layouts/AlertPopup';
 import Home from './pages/Home';
 import Patient from './pages/patient/Patient';
 import Doctor from './pages/doctor/Doctor';
+import Reports from './pages/Reports';
 
 // Ensure this is a standard array
 const routes = [
@@ -35,6 +36,15 @@ const routes = [
           <>
             <AlertPopup />
             <Doctor />
+          </>
+        ),
+      },
+      {
+        path: 'reports',
+        element: (
+          <>
+            <AlertPopup />
+            <Reports />
           </>
         ),
       },

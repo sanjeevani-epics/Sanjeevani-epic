@@ -3,15 +3,19 @@ import {
   Box, Card, CardContent, Typography, Backdrop, CircularProgress,
   TextField, MenuItem, Select, FormControl, InputLabel, Button,
   Grid, Dialog, DialogTitle, DialogContent, IconButton, InputAdornment,
-  Table, TableBody, TableCell, TableHead, TableRow, Divider, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip
+  Table, TableBody, TableCell, TableHead, TableRow, Divider, List, ListItem, ListItemText, ListItemAvatar, Avatar, Chip,
+  Modal
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
 import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
 import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import useEth from "../../contexts/EthContext/useEth";
 import Record from "../../components/Record";
+import uploadToIPFS from "../../ipfs";
+import AddRecordModal from "../doctor/AddRecordModal";
 
 const Patient = () => {
   const {
@@ -39,6 +43,9 @@ const Patient = () => {
   const [managingConsent, setManagingConsent] = useState(false);
 
   const [pendingRequests, setPendingRequests] = useState([]);
+
+  // ===== SELF-UPLOAD FEATURE STATE =====
+  const [addRecordModalOpen, setAddRecordModalOpen] = useState(false);
 
   const loadRequests = useCallback(() => {
     if (!accounts?.length) return;
@@ -162,6 +169,31 @@ const Patient = () => {
     localStorage.setItem(key, JSON.stringify(updated));
     loadRequests();
   };
+
+  // ===== SELF-UPLOAD FUNCTIONS =====
+  const handleAddRecordUpload = useCallback(
+    async (buffer, fileName, patientAddress, metadataStr) => {
+      try {
+        const ipfsHash = await uploadToIPFS(buffer, fileName);
+        if (ipfsHash) {
+          // Use addRecordAsSelf instead of addRecord
+          await contract.methods
+            .addRecordAsSelf(ipfsHash, fileName, metadataStr)
+            .send({ from: accounts[0] });
+
+          alert("Your record has been uploaded successfully!");
+          setAddRecordModalOpen(false);
+          
+          // Refresh records
+          setManagingConsent(prev => !prev);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to upload record: " + err.message);
+      }
+    },
+    [accounts, contract]
+  );
 
   // --- Status Screens ---
   if (loading) return <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}><CircularProgress color="inherit" /></Backdrop>;
@@ -363,7 +395,36 @@ const Patient = () => {
           </CardContent>
         </Card>
 
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1e293b', mt: 4 }}>My Medical Records</Typography>
+        {/* Medical Records Header */}
+        <Card sx={{ mb: 3, background: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)", color: 'white', borderRadius: 2 }}>
+          <CardContent sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>My Medical Records</Typography>
+              <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>References stored on-chain • file content on IPFS</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, mt: { xs: 2, sm: 0 }, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TextField 
+                size="small" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{ startAdornment: (<InputAdornment position="start"><SearchRoundedIcon /></InputAdornment>) }}
+              />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Sort By</InputLabel>
+                <Select value={sortOrder} label="Sort By" onChange={(e) => setSortOrder(e.target.value)}>
+                  <MenuItem value="newest">Newest First</MenuItem>
+                  <MenuItem value="oldest">Oldest First</MenuItem>
+                </Select>
+              </FormControl>
+              <Button 
+                variant="contained" 
+                sx={{ background: 'white', color: '#0f766e', fontWeight: 600, '&:hover': { background: '#f0fdfa' } }}
+                onClick={() => setAddRecordModalOpen(true)}
+                startIcon={<CloudUploadRoundedIcon />}
+              >
+                Upload My Record
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
 
         <Card sx={{ mb: 4, border: "1px solid #cce5df", borderRadius: 3, boxShadow: "none", overflow: 'hidden' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: '#e8f4f0', borderBottom: '1px solid #cce5df' }}>
@@ -403,6 +464,15 @@ const Patient = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* ===== ADD RECORD MODAL (PATIENT SELF-UPLOAD) ===== */}
+        <Modal open={addRecordModalOpen} onClose={() => setAddRecordModalOpen(false)}>
+          <AddRecordModal
+            handleClose={() => setAddRecordModalOpen(false)}
+            handleUpload={handleAddRecordUpload}
+            patientAddress={accounts?.[0]}
+          />
+        </Modal>
 
       </Box>
     </Box>

@@ -31,6 +31,7 @@ const MainLayout = () => {
     { label: "Home", to: "/" },
     { label: "Doctor", to: "/doctor" },
     { label: "Patient", to: "/patient" },
+    { label: "Reports", to: "/reports" },
   ];
   const shortAccount =
     accountText && accountText.startsWith("0x")
