@@ -20,6 +20,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  Button,
 } from "@mui/material";
 import CustomButton from "../../components/CustomButton";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
@@ -328,38 +329,33 @@ const Doctor = () => {
           />
         </Modal>
 
-        <Typography variant="h4" sx={{ color: 'white', mb: 3, fontWeight: 'bold' }}>
-          Doctor Dashboard
-        </Typography>
-
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {/* Stats Card */}
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)', color: 'white' }}>
-              <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                <AssessmentRoundedIcon sx={{ fontSize: 48, opacity: 0.8, mb: 1 }} />
-                <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                  {dashboardStats.totalRecords}
-                </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                  Total Records Uploaded
-                </Typography>
+          <Grid item xs={12} md={5}>
+            <Card sx={{ height: '100%', background: '#0f766e', color: 'white', borderRadius: 4, boxShadow: '0 10px 25px rgba(15, 118, 110, 0.3)' }}>
+              <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%', p: { xs: 3, md: 4 } }}>
+                <Box>
+                  <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 500, mb: 2 }}>
+                    Total Records Uploaded
+                  </Typography>
+                  <Typography sx={{ fontWeight: 800, fontSize: '4.5rem', lineHeight: 1 }}>
+                    {dashboardStats.totalRecords}
+                  </Typography>
+                </Box>
+                <AssessmentRoundedIcon sx={{ fontSize: 90, opacity: 0.8 }} />
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Activity Feed Card */}
-          <Grid item xs={12} md={8}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" gap={1} mb={2}>
-                  <HistoryRoundedIcon color="primary" />
-                  <Typography variant="h6">
-                    Recent Activity
-                  </Typography>
-                </Box>
-                <Divider />
-                <List sx={{ pt: 0, pb: 0 }}>
+          <Grid item xs={12} md={7}>
+            <Card sx={{ height: '100%', borderRadius: 3, border: '1px solid #14b8a6', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ background: '#14b8a6', color: 'white', py: 1.5, px: 2.5 }}>
+                <Typography variant="h6" fontWeight={600}>
+                  Recent Activity
+                </Typography>
+              </Box>
+              <CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                <List sx={{ pt: 0, pb: 0, flexGrow: 1 }}>
                   {dashboardStats.recentActivities.length === 0 ? (
                     <Typography variant="body2" color="textSecondary" sx={{ py: 3, textAlign: 'center' }}>
                       No recent on-chain activity found.
@@ -367,17 +363,30 @@ const Doctor = () => {
                   ) : (
                     dashboardStats.recentActivities.map((act, i) => (
                       <React.Fragment key={i}>
-                        <ListItem sx={{ px: 0 }}>
-                          <ListItemIcon sx={{ minWidth: 40 }}>
-                            {act.type.includes('Record') ? <NoteAddRoundedIcon color="secondary" /> : <VpnKeyRoundedIcon color={act.type.includes('Granted') ? "success" : "error"} />}
+                        <ListItem sx={{ px: 2.5, py: 1.5 }}>
+                          <ListItemIcon sx={{ minWidth: 44 }}>
+                            <Box sx={{ 
+                              bgcolor: act.type.includes('Record') ? '#e0f2fe' : (act.type.includes('Granted') ? '#dcfce7' : '#f3f4f6'), 
+                              p: 1.2, 
+                              borderRadius: '50%',
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center' 
+                            }}>
+                              {act.type.includes('Record') ? <NoteAddRoundedIcon fontSize="small" sx={{ color: '#0284c7' }} /> : <VpnKeyRoundedIcon fontSize="small" sx={{ color: act.type.includes('Granted') ? "#16a34a" : "#64748b" }} />}
+                            </Box>
                           </ListItemIcon>
                           <ListItemText 
                             primary={
-                              <Typography variant="subtitle2">
+                              <Typography variant="body1" fontWeight={600} color="text.primary">
                                 {act.type}
                               </Typography>
                             } 
-                            secondary={`Patient: ${act.patient.substring(0,6)}...${act.patient.substring(act.patient.length-4)}`} 
+                            secondary={
+                              <Typography variant="body2" color="text.secondary">
+                                Patient: {`${act.patient.substring(0,6)}...${act.patient.substring(act.patient.length-4)}`} - Block {act.blockNumber}
+                              </Typography>
+                            } 
                           />
                         </ListItem>
                         {i < dashboardStats.recentActivities.length - 1 && <Divider component="li" />}
@@ -391,59 +400,81 @@ const Doctor = () => {
         </Grid>
 
         <Card sx={{
-          mb: 3,
-          background: "linear-gradient(135deg, #0f766e 0%, #115e59 100%)",
-          color: "white",
+          mb: 4,
+          background: "#eefaf6",
+          borderRadius: 3,
+          border: '1px solid #ccf0e6',
+          boxShadow: 'none'
         }}>
-          <CardContent>
-            <Typography variant="h5" mb={1.5}>
+          <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+            <Typography variant="h4" mb={1} fontWeight={800} color="#0f172a">
               Search Patient Records
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
+            <Typography variant="body1" sx={{ color: '#475569', mb: 3, maxWidth: 600 }}>
               Find a patient by wallet address to review records and upload new files.
             </Typography>
 
-            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "flex-end" }} gap={2}>
+            <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems="stretch" gap={2}>
               <FormControl fullWidth>
                 <TextField
                   variant="outlined"
-                  label="Patient wallet address"
-                  placeholder="0x..."
+                  placeholder="Patient wallet address"
                   value={searchPatientAddress}
                   onChange={(e) => setSearchPatientAddress(e.target.value)}
-                  size="small"
+                  size="medium"
                   sx={{
-                    '& .MuiInputBase-root': {
-                      backgroundColor: 'rgba(255,255,255,0.15)',
-                      color: 'white',
+                    bgcolor: 'white',
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
+                      '& fieldset': { borderColor: '#cbd5e1' },
+                      '&:hover fieldset': { borderColor: '#94a3b8' },
+                      '&.Mui-focused fieldset': { borderColor: '#0f766e', borderWidth: 2 },
                     },
                     '& .MuiInputBase-input::placeholder': {
-                      color: 'rgba(255,255,255,0.7)',
+                      color: '#94a3b8',
                       opacity: 1,
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: "rgba(255,255,255,0.8)",
-                    },
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <SearchRoundedIcon sx={{ color: '#94a3b8', mr: 1 }} />
+                    ),
                   }}
                 />
               </FormControl>
 
-              <CustomButton text="Search" handleClick={searchPatient}>
-                <SearchRoundedIcon style={{ color: "white" }} />
-              </CustomButton>
+              <Button 
+                variant="contained" 
+                onClick={searchPatient}
+                sx={{ 
+                  backgroundColor: '#0f766e', 
+                  color: 'white', 
+                  px: 4,
+                  fontSize: '1rem',
+                  borderRadius: 2,
+                  boxShadow: 'none',
+                  whiteSpace: 'nowrap',
+                  '&:hover': {
+                    backgroundColor: '#0b504b',
+                    boxShadow: 'none',
+                  }
+                }}
+              >
+                Search
+              </Button>
 
               {patientExist && (
-                <Chip label="Patient Found" color="success" variant="outlined" sx={{ color: "white", borderColor: "white", height: 40 }} />
+                <Chip label="Patient Found" color="success" sx={{ alignSelf: 'center', height: 48, borderRadius: 2, px: 1, fontWeight: 600 }} />
               )}
             </Box>
 
             {recentPatients.length > 0 && (
-              <Box mt={3}>
-                <Typography variant="body2" sx={{ opacity: 0.8, mb: 1.5 }}>
+              <Box mt={4}>
+                <Typography variant="body2" sx={{ color: '#334155', fontWeight: 600, mb: 1.5 }}>
                   Recent Patients:
                 </Typography>
-                <Box display="flex" flexWrap="wrap" gap={1}>
+                <Box display="flex" flexWrap="wrap" gap={1.5}>
                   {recentPatients.map((addr) => (
                     <Chip
                       key={addr}
@@ -451,13 +482,17 @@ const Doctor = () => {
                       clickable
                       onClick={() => searchPatient(addr)}
                       sx={{
-                        color: "white",
-                        backgroundColor: "rgba(255,255,255,0.1)",
-                        border: '1px solid rgba(255,255,255,0.2)',
+                        backgroundColor: "white",
+                        color: "#334155",
+                        border: '1px solid #cbd5e1',
+                        borderRadius: 6,
+                        px: 1,
+                        py: 2.2,
+                        fontWeight: 500,
                         transition: 'all 0.2s',
                         '&:hover': {
-                          backgroundColor: "rgba(255,255,255,0.25)",
-                          transform: "translateY(-1px)"
+                          backgroundColor: "#f1f5f9",
+                          borderColor: '#94a3b8'
                         }
                       }}
                     />

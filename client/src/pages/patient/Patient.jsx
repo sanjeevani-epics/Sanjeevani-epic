@@ -189,64 +189,8 @@ const Patient = () => {
   const reversedHistory = [...consentHistory].reverse();
 
   return (
-    <Box display="flex" justifyContent="center" width="100%" sx={{ py: 1, px: 2 }}>
-      <Box width={{ xs: "100%", md: "90%" }}>
-        
-        {/* Patient Profile */}
-        <Card sx={{ mb: 3, boxShadow: "0 4px 14px rgba(15, 23, 42, 0.08)", borderRadius: 2 }}>
-          <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h5" sx={{ fontWeight: 600, color: '#0f766e' }}>Patient Details</Typography>
-              {!isEditingProfile ? (
-                <Button variant="outlined" onClick={() => setIsEditingProfile(true)}>Edit Profile</Button>
-              ) : (
-                <Button variant="contained" onClick={handleSaveProfile} sx={{ backgroundColor: '#0f766e' }}>Save Profile</Button>
-              )}
-            </Box>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField fullWidth label="Full Name" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} disabled={!isEditingProfile} />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField fullWidth label="Age" type="number" value={profile.age} onChange={(e) => setProfile({ ...profile, age: e.target.value })} disabled={!isEditingProfile} />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField fullWidth label="Blood Group" value={profile.bloodGroup} onChange={(e) => setProfile({ ...profile, bloodGroup: e.target.value })} disabled={!isEditingProfile} />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField fullWidth label="Allergies / Notes" value={profile.allergies} onChange={(e) => setProfile({ ...profile, allergies: e.target.value })} disabled={!isEditingProfile} />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-
-        {/* Dashboard Summary Section */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ bgcolor: '#eff6ff', border: '1px solid #bfdbfe', boxShadow: 'none' }}>
-              <CardContent>
-                <Typography variant="body2" color="textSecondary">Total Records</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e3a8a' }}>{totalRecords}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ bgcolor: '#f0fdf4', border: '1px solid #bbf7d0', boxShadow: 'none' }}>
-              <CardContent>
-                <Typography variant="body2" color="textSecondary">Latest Visit</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: '#166534' }}>{latestVisitStr}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ bgcolor: '#fdf4ff', border: '1px solid #fbcfe8', boxShadow: 'none' }}>
-              <CardContent>
-                <Typography variant="body2" color="textSecondary">Active Doctors</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: '#86198f' }}>{activeDoctorsCount}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+    <Box display="flex" justifyContent="center" width="100%" sx={{ py: 4, px: 2, backgroundColor: 'transparent' }}>
+      <Box width={{ xs: "100%", lg: "85%" }}>
 
         {pendingRequests.length > 0 && (
           <Card sx={{ mb: 3, border: "1px solid #f59e0b", background: "#fffbeb", borderRadius: 2 }}>
@@ -276,162 +220,176 @@ const Patient = () => {
           </Card>
         )}
 
-        {/* Consent & Access Control Section */}
-        <Card sx={{ mb: 3, border: "1px solid rgba(15, 118, 110, 0.2)", borderRadius: 2 }}>
-          <CardContent>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <SecurityRoundedIcon sx={{ color: '#0f766e' }} />
-              <Typography variant="h5" sx={{ fontWeight: 600, color: '#0f766e' }}>Data Privacy & Consent Control</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1e293b' }}>Overview</Typography>
+
+        {/* Patient Profile */}
+        <Card sx={{ mb: 3, border: "1px solid #cce5df", borderRadius: 3, boxShadow: "none" }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a' }}>Patient Details</Typography>
+              {!isEditingProfile ? (
+                <Button size="small" sx={{ color: '#0f766e', fontWeight: 600 }} onClick={() => setIsEditingProfile(true)}>Edit</Button>
+              ) : (
+                <Button size="small" variant="contained" onClick={handleSaveProfile} sx={{ backgroundColor: '#0f766e', borderRadius: 4, boxShadow: 'none' }}>Save</Button>
+              )}
             </Box>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-              Doctors cannot access your medical records by default. You must explicitly grant them permission below. You can revoke access at any time.
-            </Typography>
-
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={7}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Grant Temporary Access</Typography>
-                <Box display="flex" flexDirection="column" gap={2} mb={4}>
-                  <TextField 
-                    fullWidth size="small" label="Doctor Wallet Address" 
-                    placeholder="0x..." value={grantAddress} onChange={(e) => setGrantAddress(e.target.value)} 
-                  />
-                  <Box display="flex" gap={2}>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>Purpose</InputLabel>
-                      <Select value={grantPurpose} label="Purpose" onChange={(e) => setGrantPurpose(e.target.value)}>
-                        <MenuItem value="Consultation">Consultation</MenuItem>
-                        <MenuItem value="Lab Result Analysis">Lab Result Analysis</MenuItem>
-                        <MenuItem value="Emergency Care">Emergency Care</MenuItem>
-                      </Select>
-                    </FormControl>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>Access Duration</InputLabel>
-                      <Select value={grantDuration} label="Access Duration" onChange={(e) => setGrantDuration(e.target.value)}>
-                        <MenuItem value={3600}>1 Hour (Emergency)</MenuItem>
-                        <MenuItem value={86400}>24 Hours</MenuItem>
-                        <MenuItem value={604800}>7 Days</MenuItem>
-                        <MenuItem value={2592000}>30 Days</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                  <Button variant="contained" color="primary" onClick={handleGrantAccess} sx={{ background: "#0f766e", alignSelf: 'flex-start' }}>
-                    Grant Secure Access
-                  </Button>
-                </Box>
-
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>Currently Authorized Doctors</Typography>
-                <Divider sx={{ mb: 2 }} />
-                {consents.length === 0 ? (
-                  <Typography variant="body2" color="textSecondary">No doctors currently have access to your records.</Typography>
-                ) : (
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Doctor</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Purpose</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Expires On</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600 }}>Action</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {consents.map((consent, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell sx={{ fontFamily: 'monospace' }}>{`${consent.doctorId.slice(0, 6)}...${consent.doctorId.slice(-4)}`}</TableCell>
-                          <TableCell><Chip label={consent.purpose} size="small" color="primary" variant="outlined" /></TableCell>
-                          <TableCell>{new Date(Number(consent.validUntil) * 1000).toLocaleString()}</TableCell>
-                          <TableCell align="right">
-                            <Button size="small" variant="outlined" color="error" onClick={() => handleRevokeAccess(consent.doctorId)}>
-                              Revoke
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={5} md={4}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', ml: 0.5, mb: 0.5, display: 'block' }}>Name</Typography>
+                <TextField fullWidth size="small" variant="outlined" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} disabled={!isEditingProfile} sx={{ '& .MuiInputBase-root': { backgroundColor: '#f1f5f9', borderRadius: 2 }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' } }} />
               </Grid>
-              
-              <Grid item xs={12} md={5}>
-                <Card sx={{ bgcolor: '#f8fafc', border: '1px solid #e2e8f0', boxShadow: 'none', height: '100%', maxHeight: 400, overflowY: 'auto' }}>
-                  <CardContent>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#334155' }}>CONSENT ACTIVITY TIMELINE</Typography>
-                    {reversedHistory.length === 0 ? (
-                      <Typography variant="caption" color="textSecondary">No consent history found.</Typography>
-                    ) : (
-                      <List dense>
-                        {reversedHistory.map((log, idx) => (
-                          <ListItem key={idx} alignItems="flex-start" sx={{ px: 0 }}>
-                            <ListItemAvatar sx={{ minWidth: 40 }}>
-                              <Avatar sx={{ width: 28, height: 28, bgcolor: log.action === "Granted" ? '#dcfce7' : '#fee2e2' }}>
-                                {log.action === "Granted" ? <VerifiedUserRoundedIcon sx={{ color: '#16a34a', fontSize: 16 }} /> : <BlockRoundedIcon sx={{ color: '#dc2626', fontSize: 16 }} />}
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText 
-                              primary={
-                                <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                  {log.action} Access for {log.purpose}
-                                </Typography>
-                              }
-                              secondary={
-                                <React.Fragment>
-                                  <span style={{ display: 'block' }}>Doctor: {`${log.doctorId.slice(0, 6)}...${log.doctorId.slice(-4)}`}</span>
-                                  <span>{new Date(Number(log.timestamp) * 1000).toLocaleString()}</span>
-                                </React.Fragment>
-                              }
-                              secondaryTypographyProps={{ variant: "caption", color: "textSecondary" }}
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    )}
-                  </CardContent>
-                </Card>
+              <Grid item xs={6} sm={3} md={2}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', ml: 0.5, mb: 0.5, display: 'block' }}>Age</Typography>
+                <TextField fullWidth size="small" variant="outlined" type="number" value={profile.age} onChange={(e) => setProfile({ ...profile, age: e.target.value })} disabled={!isEditingProfile} sx={{ '& .MuiInputBase-root': { backgroundColor: '#f1f5f9', borderRadius: 2 }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' } }} />
+              </Grid>
+              <Grid item xs={6} sm={4} md={3}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', ml: 0.5, mb: 0.5, display: 'block' }}>Blood Group</Typography>
+                <TextField fullWidth size="small" variant="outlined" value={profile.bloodGroup} onChange={(e) => setProfile({ ...profile, bloodGroup: e.target.value })} disabled={!isEditingProfile} sx={{ '& .MuiInputBase-root': { backgroundColor: '#f1f5f9', borderRadius: 2 }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' } }} />
               </Grid>
             </Grid>
           </CardContent>
         </Card>
 
-        {/* Medical Records Header */}
-        <Card sx={{ mb: 3, background: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)", color: 'white', borderRadius: 2 }}>
-          <CardContent sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>My Medical Records</Typography>
-              <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>References stored on-chain • file content on IPFS</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, mt: { xs: 2, sm: 0 }, background: 'white', p: 1, borderRadius: 2 }}>
-              <TextField 
-                size="small" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{ startAdornment: (<InputAdornment position="start"><SearchRoundedIcon /></InputAdornment>) }}
-              />
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Sort By</InputLabel>
-                <Select value={sortOrder} label="Sort By" onChange={(e) => setSortOrder(e.target.value)}>
-                  <MenuItem value="newest">Newest First</MenuItem>
-                  <MenuItem value="oldest">Oldest First</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+        {/* Dashboard Summary Section */}
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ border: '1px solid #cce5df', borderRadius: 2, boxShadow: 'none', overflow: 'hidden' }}>
+              <Box sx={{ bgcolor: '#e8f4f0', py: 1.2, textAlign: 'center', borderBottom: '1px solid #cce5df' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155' }}>Total Records</Typography>
+              </Box>
+              <CardContent sx={{ textAlign: 'center', py: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a' }}>{totalRecords}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ border: '1px solid #cce5df', borderRadius: 2, boxShadow: 'none', overflow: 'hidden' }}>
+              <Box sx={{ bgcolor: '#e8f4f0', py: 1.2, textAlign: 'center', borderBottom: '1px solid #cce5df' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155' }}>Latest Visit</Typography>
+              </Box>
+              <CardContent sx={{ textAlign: 'center', py: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', mt: 0.5 }}>{latestVisitStr}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ border: '1px solid #cce5df', borderRadius: 2, boxShadow: 'none', overflow: 'hidden' }}>
+              <Box sx={{ bgcolor: '#e8f4f0', py: 1.2, textAlign: 'center', borderBottom: '1px solid #cce5df' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155' }}>Active Doctors</Typography>
+              </Box>
+              <CardContent sx={{ textAlign: 'center', py: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a' }}>{activeDoctorsCount}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1e293b', mt: 4 }}>Data Privacy & Consent Control</Typography>
+
+        {/* Consent & Access Control Section */}
+        <Card sx={{ mb: 4, border: "1px solid #cce5df", borderRadius: 3, boxShadow: "none" }}>
+          <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+            <Grid container>
+              <Grid item xs={12} md={6} sx={{ p: 3, borderRight: { md: '1px solid #e2e8f0' }, borderBottom: { xs: '1px solid #e2e8f0', md: 'none' } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#0f172a' }}>Grant Temporary Access</Typography>
+                <Box display="flex" flexDirection="column" gap={2} mb={3}>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', ml: 0.5, mb: 0.5, display: 'block' }}>Doctor Wallet Address</Typography>
+                    <TextField 
+                      fullWidth size="small" placeholder="0x..." value={grantAddress} onChange={(e) => setGrantAddress(e.target.value)} 
+                      sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#f1f5f9', borderRadius: 2, '& fieldset': { borderColor: '#cbd5e1' } } }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', ml: 0.5, mb: 0.5, display: 'block' }}>Purpose</Typography>
+                    <TextField 
+                      fullWidth size="small" placeholder="Purpose..." value={grantPurpose} onChange={(e) => setGrantPurpose(e.target.value)} 
+                      sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#f1f5f9', borderRadius: 2, '& fieldset': { borderColor: '#cbd5e1' } } }}
+                    />
+                  </Box>
+                  <Box display="flex" gap={2}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', ml: 0.5, mb: 0.5, display: 'block' }}>Access Duration</Typography>
+                      <FormControl fullWidth size="small">
+                        <Select value={grantDuration} onChange={(e) => setGrantDuration(e.target.value)} sx={{ bgcolor: '#f1f5f9', borderRadius: 2, '& fieldset': { borderColor: '#cbd5e1' } }}>
+                          <MenuItem value={3600}>1 Hour (Emergency)</MenuItem>
+                          <MenuItem value={86400}>24 Hours</MenuItem>
+                          <MenuItem value={604800}>7 Days</MenuItem>
+                          <MenuItem value={2592000}>30 Days</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+                  <Button variant="contained" onClick={handleGrantAccess} disableElevation sx={{ background: "#4a8a81", color: "white", borderRadius: 6, py: 1, mt: 1, fontWeight: 600, '&:hover': { background: "#39736a" } }}>
+                    GRANT SECURE ACCESS
+                  </Button>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} md={6} sx={{ p: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#0f172a' }}>Consent Activity Timeline</Typography>
+                <Box sx={{ height: 280, overflowY: 'auto', pr: 1 }}>
+                  {reversedHistory.length === 0 ? (
+                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', mt: 2 }}>No consent activity logged yet.</Typography>
+                  ) : (
+                    <List disablePadding>
+                      {reversedHistory.map((log, idx) => (
+                        <ListItem key={idx} alignItems="flex-start" sx={{ px: 0, py: 1.5, position: 'relative', '&::before': { content: '""', position: 'absolute', left: 14, top: 40, bottom: -10, width: 2, bgcolor: '#e2e8f0', display: idx === reversedHistory.length - 1 ? 'none' : 'block' } }}>
+                          <ListItemAvatar sx={{ minWidth: 40, mt: 0.5 }}>
+                            <Box sx={{ width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: log.action === "Granted" ? '#0f766e' : '#94a3b8', color: 'white', zIndex: 2, position: 'relative' }}>
+                              {log.action === "Granted" ? <VerifiedUserRoundedIcon sx={{ fontSize: 16 }} /> : <BlockRoundedIcon sx={{ fontSize: 16 }} />}
+                            </Box>
+                          </ListItemAvatar>
+                          <ListItemText 
+                            primary={
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                {log.action} Access for {`${log.doctorId.slice(0, 6)}...${log.doctorId.slice(-4)}`}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>
+                                ({new Date(Number(log.timestamp) * 1000).toLocaleString()})
+                              </Typography>
+                            }
+                            sx={{ m: 0 }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
           </CardContent>
         </Card>
 
-        {filteredRecords.length === 0 ? (
-          <Card sx={{ boxShadow: 2, background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)" }}>
-            <CardContent sx={{ py: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Typography variant="h6" color="text.secondary" mb={1}>No Records Found</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {records.length > 0 ? "No records match your search criteria." : "Your medical records will appear here once your doctor uploads them."}
-              </Typography>
-            </CardContent>
-          </Card>
-        ) : (
-          <Box display="flex" flexDirection="column" gap={2} mb={4}>
-            {filteredRecords.map((record, index) => (
-              <Box key={index}>
-                <Record record={record} onPreview={handlePreview} />
-              </Box>
-            ))}
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1e293b', mt: 4 }}>My Medical Records</Typography>
+
+        <Card sx={{ mb: 4, border: "1px solid #cce5df", borderRadius: 3, boxShadow: "none", overflow: 'hidden' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: '#e8f4f0', borderBottom: '1px solid #cce5df' }}>
+             <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a', flex: 1.5, pl: 2 }}>File Name</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a', flex: 1.5 }}>Doctor Details</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a', flex: 1 }}>Date</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a', flex: 1, textAlign: 'center' }}>Actions</Typography>
+             </Box>
           </Box>
-        )}
+          <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+            {filteredRecords.length === 0 ? (
+              <Box sx={{ py: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="h6" color="text.secondary" mb={1}>No Records Found</Typography>
+              </Box>
+            ) : (
+              <Box display="flex" flexDirection="column">
+                {filteredRecords.map((record, index) => (
+                  <Box key={index} sx={{ borderBottom: index < filteredRecords.length - 1 ? '1px solid #e2e8f0' : 'none' }}>
+                    <Record record={record} onPreview={handlePreview} isTableRow={true} />
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </CardContent>
+        </Card>
 
         {/* File Preview Dialog */}
         <Dialog open={previewData.open} onClose={closePreview} maxWidth="lg" fullWidth>

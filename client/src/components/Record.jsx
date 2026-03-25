@@ -17,7 +17,7 @@ import IosShareRoundedIcon from "@mui/icons-material/IosShareRounded";
 import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs";
 
-const Record = ({ record, onPreview }) => {
+const Record = ({ record, onPreview, isTableRow }) => {
   // Extract including metadata
   const [cid, name, patientId, doctorId, timestamp, metadataStr] = record;
 
@@ -57,6 +57,66 @@ const Record = ({ record, onPreview }) => {
       </IconButton>
     </React.Fragment>
   );
+
+  if (isTableRow) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', py: 1 }}>
+        <Box sx={{ flex: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, pl: 1 }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: 2, background: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <DescriptionRoundedIcon sx={{ color: 'white' }} />
+          </Box>
+          <Box>
+            <Typography sx={{ fontWeight: 600, color: '#0f172a' }}>{name}</Typography>
+            {metadata.category && <Chip label={metadata.category} size="small" sx={{ height: 18, fontSize: '0.65rem', mt: 0.5, bgcolor: '#e8f4f0', color: '#0f766e', fontWeight: 600 }} />}
+          </Box>
+        </Box>
+
+        <Box sx={{ flex: 1.5, pr: 2 }}>
+          <Typography sx={{ fontWeight: 500, color: '#334155' }}>
+            {metadata.hospital ? metadata.hospital : `${doctorId.slice(0, 6)}...${doctorId.slice(-4)}`}
+          </Typography>
+        </Box>
+
+        <Box sx={{ flex: 1 }}>
+          <Typography sx={{ fontWeight: 500, color: '#334155' }}>
+            {dayjs.unix(timestamp).format("MMM DD, YYYY")}
+          </Typography>
+        </Box>
+
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
+          <Tooltip title="Share secure link">
+            <IconButton onClick={handleShareClick} sx={{ bgcolor: '#e8f4f0', color: '#0f766e', p: 1, '&:hover': { bgcolor: '#cce5df' } }}>
+              <IosShareRoundedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {onPreview && (
+            <Tooltip title="Preview inline">
+              <IconButton onClick={() => onPreview(cid, name)} sx={{ bgcolor: '#e8f4f0', color: '#0f766e', p: 1, '&:hover': { bgcolor: '#cce5df' } }}>
+                <VisibilityRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Tooltip title="Download IPFS file">
+            <a href={shareLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+              <IconButton sx={{ bgcolor: '#e8f4f0', color: '#0f766e', p: 1, '&:hover': { bgcolor: '#cce5df' } }}>
+                <CloudDownloadRoundedIcon fontSize="small" />
+              </IconButton>
+            </a>
+          </Tooltip>
+        </Box>
+
+        <Snackbar
+          open={shareOpen}
+          autoHideDuration={4000}
+          onClose={handleShareClose}
+          message="Link copied to clipboard"
+          action={actionBox}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          sx={{ '& .MuiSnackbarContent-root': { backgroundColor: '#0f766e', borderRadius: '12px' } }}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Card sx={{

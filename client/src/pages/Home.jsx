@@ -27,6 +27,7 @@ import useEth from "../contexts/EthContext/useEth";
 import useAuth from "../contexts/AuthContext/useAuth";
 import useAlert from "../contexts/AlertContext/useAlert";
 import logo from "../assets/LogoTealBG.jpg";
+import videoBg from "../assets/BackgroundVideo.mp4";
 import "../App.css";
 
 const Home = () => {
@@ -83,7 +84,7 @@ const Home = () => {
           size="large"
           onClick={login}
           startIcon={<AccountBalanceWalletRoundedIcon />}
-          sx={{ px: 3, py: 1.2 }}
+          sx={{ backgroundColor: '#0f766e', color: 'white', '&:hover': { backgroundColor: '#0b504b' } }}
         >
           Connect MetaMask
         </Button>
@@ -105,9 +106,9 @@ const Home = () => {
           size="large"
           onClick={() => navigate("/doctor")}
           startIcon={<LoginRoundedIcon />}
-          sx={{ px: 3, py: 1.2 }}
+          sx={{ backgroundColor: '#0f766e', color: 'white', '&:hover': { backgroundColor: '#0b504b' } }}
         >
-          Go to Doctor Dashboard
+          GO TO DOCTOR DASHBOARD
         </Button>
       );
     }
@@ -119,9 +120,9 @@ const Home = () => {
           size="large"
           onClick={() => navigate("/patient")}
           startIcon={<LoginRoundedIcon />}
-          sx={{ px: 3, py: 1.2 }}
+          sx={{ backgroundColor: '#0f766e', color: 'white', '&:hover': { backgroundColor: '#0b504b' } }}
         >
-          Go to Patient Dashboard
+          GO TO PATIENT DASHBOARD
         </Button>
       );
     }
@@ -143,36 +144,31 @@ const Home = () => {
   return (
     <Box className="home-page-root">
       <Box className="home-hero">
-        <Box className="home-hero-glow" />
-        <Stack spacing={2} alignItems={{ xs: "flex-start", md: "center" }} textAlign={{ xs: "left", md: "center" }}>
-          <Box display="flex" alignItems="center" gap={1.5}>
-            <img src={logo} alt="sanjeevani-logo" style={{ height: 46, width: 46, borderRadius: 8 }} />
-            <Typography variant="h6" fontWeight={700}>
-              Sanjeevani
-            </Typography>
-          </Box>
-          <Typography variant="h3" sx={{ fontWeight: 800, maxWidth: 920 }}>
+        <video autoPlay loop muted playsInline className="home-hero-video">
+          <source src={videoBg} type="video/mp4" />
+        </video>
+        <Box className="home-hero-overlay" />
+        <Stack className="home-hero-content" spacing={3} alignItems={{ xs: "flex-start", md: "center" }} textAlign={{ xs: "left", md: "center" }}>
+          <Typography variant="h2" sx={{ fontWeight: 800, maxWidth: 920, fontSize: { xs: "2.5rem", md: "3.75rem" }, textShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
             Secure, tamper-evident medical records for doctors and patients
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 780 }}>
+          <Typography variant="h6" sx={{ maxWidth: 780, color: "rgba(255,255,255,0.85)", fontWeight: 400 }}>
             Sanjeevani is a blockchain EMR demo where doctors upload records to IPFS and store verified
             references on-chain, while patients access only their authorized history.
           </Typography>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-            {renderPrimaryAction()}
-            <Button variant="outlined" size="large" onClick={scrollToHowItWorks}>
-              Learn How It Works
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 2 }}>
+            <Box sx={{ '& .MuiButton-root': { py: 1.5, px: 4, fontSize: '1.05rem', borderRadius: 8 } }}>
+              {renderPrimaryAction()}
+            </Box>
+            <Button variant="contained" size="large" onClick={scrollToHowItWorks} sx={{ backgroundColor: 'white', color: '#1f2937', py: 1.5, px: 4, fontSize: '1.05rem', borderRadius: 8, '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' } }}>
+              LEARN HOW IT WORKS
             </Button>
-          </Stack>
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            <Chip icon={<HubRoundedIcon />} label="Ethereum + MetaMask" />
-            <Chip icon={<CloudDoneRoundedIcon />} label="IPFS Storage" />
-            <Chip icon={<SecurityRoundedIcon />} label="Role-aware Access" />
           </Stack>
         </Stack>
       </Box>
 
-      <Grid container spacing={2.5} sx={{ mb: 5 }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 3 } }}>
+        <Grid container spacing={3} sx={{ mb: 6, mt: { xs: -4, md: -10 }, position: "relative", zIndex: 4 }}>
         <Grid item xs={12} md={4}>
           <Card className="home-info-card">
             <CardContent>
@@ -338,13 +334,14 @@ const Home = () => {
         </CardContent>
       </Card>
 
-      <Box className="home-footer">
-        <Typography variant="body2" color="text.secondary">
-          Sanjeevani Epic - Blockchain EMR demo
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Powered by Ethereum and IPFS
-        </Typography>
+        <Box className="home-footer">
+          <Typography variant="body2" color="text.secondary">
+            Sanjeevani Epic - Blockchain EMR demo
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Powered by Ethereum and IPFS
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
