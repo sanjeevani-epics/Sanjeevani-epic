@@ -42,6 +42,13 @@ contract EHR {
   // Mapping approach for O(1) checks. patientId -> (doctorId -> Consent)
   mapping(address => mapping(address => Consent)) public patientConsents;
 
+  struct AccessRequest {
+    address doctorId;
+    uint256 timestamp;
+  }
+
+  mapping(address => AccessRequest[]) public accessRequests;
+
   event PatientAdded(address patientId);
   event DoctorAdded(address doctorId);
   event RecordAdded(string cid, address patientId, address doctorId);
@@ -69,7 +76,7 @@ contract EHR {
   }
 
   // functions
-  function addPatient(address _patientId) public senderIsDoctor {
+  function addPatient(address _patientId) public {
     require(patients[_patientId].id != _patientId, 'This patient already exists.');
     patients[_patientId].id = _patientId;
 
@@ -151,6 +158,35 @@ contract EHR {
     patients[msg.sender].consentHistory.push(clog);
 
     emit ConsentUpdated(msg.sender, _doctorId, 'Granted');
+
+    removeAccessRequest(msg.sender, _doctorId);
+  }
+
+  function requestAccess(address _patientId) public senderIsDoctor patientExists(_patientId) {
+    for (uint i = 0; i < accessRequests[_patientId].length; i++) {
+        require(accessRequests[_patientId][i].doctorId != msg.sender, "Request already sent to this patient");
+    }
+    AccessRequest memory req = AccessRequest(msg.sender, block.timestamp);
+    accessRequests[_patientId].push(req);
+  }
+
+  function getAccessRequests(address _patientId) public view patientExists(_patientId) returns (AccessRequest[] memory) {
+      require(msg.sender == _patientId, "Not your records");
+      return accessRequests[_patientId];
+  }
+  
+  function removeAccessRequest(address _patientId, address _doctorId) internal {
+      for (uint i = 0; i < accessRequests[_patientId].length; i++) {
+        if (accessRequests[_patientId][i].doctorId == _doctorId) {
+            accessRequests[_patientId][i] = accessRequests[_patientId][accessRequests[_patientId].length - 1];
+            accessRequests[_patientId].pop();
+            break;
+        }
+      }
+  }
+
+  function denyAccessRequest(address _doctorId) public senderIsPatient {
+      removeAccessRequest(msg.sender, _doctorId);
   }
 
   function revokeAccess(address _doctorId) public senderIsPatient {
@@ -191,7 +227,7 @@ contract EHR {
   }
 
   function getConsentHistory(address _patientId) public view patientExists(_patientId) returns (ConsentLog[] memory) {
-    require(msg.sender == _patientId || doctors[msg.sender].id == msg.sender, 'Unauthorized');
+    require(msg.sender == _patientId, 'Unauthorized: Only patient can view consent history');
     return patients[_patientId].consentHistory;
   }
 
