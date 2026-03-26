@@ -223,22 +223,15 @@ const Doctor = () => {
   };
 
   // ============ REQUEST ACCESS (LEVEL 2) ============
-  const requestAccess = (patientAddress) => {
-    const key = `accessRequests_${patientAddress.toLowerCase()}`;
-    const existing = JSON.parse(localStorage.getItem(key)) || [];
-    
-    if (existing.some(req => req.doctorId.toLowerCase() === accounts[0].toLowerCase())) {
-        setAlert("You have already sent an access request to this patient.", "info");
-        return;
+  const requestAccess = async (patientAddress) => {
+    if (!contract || !accounts?.length) return;
+    try {
+        await contract.methods.requestAccess(patientAddress).send({ from: accounts[0] });
+        setAlert("Access request sent to the patient's portal successfully!", "success");
+    } catch (err) {
+        console.error("Failed to request access", err);
+        setAlert(err.message || "Failed to send access request.", "error");
     }
-    
-    existing.push({
-      doctorId: accounts[0],
-      timestamp: Date.now(),
-      status: "pending"
-    });
-    localStorage.setItem(key, JSON.stringify(existing));
-    setAlert("Access request sent to the patient's portal successfully!", "success");
   };
 
   // ============ ADD RECORD (LEVEL 3) ============

@@ -47,18 +47,19 @@ const Patient = () => {
   // ===== SELF-UPLOAD FEATURE STATE =====
   const [addRecordModalOpen, setAddRecordModalOpen] = useState(false);
 
-  const loadRequests = useCallback(() => {
-    if (!accounts?.length) return;
-    const key = `accessRequests_${accounts[0].toLowerCase()}`;
-    setPendingRequests(JSON.parse(localStorage.getItem(key)) || []);
-  }, [accounts]);
+  const loadRequests = useCallback(async () => {
+    if (!accounts?.length || !contract) return;
+    try {
+        const requests = await contract.methods.getAccessRequests(accounts[0]).call({ from: accounts[0] });
+        setPendingRequests(requests || []);
+    } catch (e) {
+        console.error("Failed to load requests", e);
+    }
+  }, [accounts, contract]);
 
   useEffect(() => {
     loadRequests();
-    const handleStorage = () => loadRequests();
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, [loadRequests]);
+  }, [loadRequests, managingConsent]);
 
   useEffect(() => {
     if (!contract || !accounts?.length) {
@@ -148,11 +149,6 @@ const Patient = () => {
     setLoadingRecords(true);
     try {
       await contract.methods.grantAccess(docId, "Requested Access", 86400).send({ from: accounts[0] });
-      const key = `accessRequests_${accounts[0].toLowerCase()}`;
-      const existing = JSON.parse(localStorage.getItem(key)) || [];
-      const updated = existing.filter(req => req.doctorId.toLowerCase() !== docId.toLowerCase());
-      localStorage.setItem(key, JSON.stringify(updated));
-      loadRequests();
       setManagingConsent(prev => !prev);
     } catch (err) {
       console.error(err);
@@ -162,12 +158,17 @@ const Patient = () => {
     }
   };
 
-  const denyRequest = (docId) => {
-    const key = `accessRequests_${accounts[0].toLowerCase()}`;
-    const existing = JSON.parse(localStorage.getItem(key)) || [];
-    const updated = existing.filter(req => req.doctorId.toLowerCase() !== docId.toLowerCase());
-    localStorage.setItem(key, JSON.stringify(updated));
-    loadRequests();
+  const denyRequest = async (docId) => {
+    setLoadingRecords(true);
+    try {
+      await contract.methods.denyAccessRequest(docId).send({ from: accounts[0] });
+      setManagingConsent(prev => !prev);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to deny request.");
+    } finally {
+      setLoadingRecords(false);
+    }
   };
 
   // ===== SELF-UPLOAD FUNCTIONS =====
@@ -213,7 +214,7 @@ const Patient = () => {
     });
 
   const totalRecords = records.length;
-  const activeDoctorsCount = new Set(records.map(r => r[3])).size;
+  const activeDoctorsCount = consents.length;
   const latestVisitStr = records.length > 0 
     ? new Date(Math.max(...records.map(r => parseInt(r[4]) * 1000))).toLocaleDateString() 
     : "N/A";
@@ -238,7 +239,7 @@ const Patient = () => {
                         Doctor: {req.doctorId}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
-                        Requested {new Date(req.timestamp).toLocaleString()}
+                        Requested {new Date(Number(req.timestamp) * 1000).toLocaleString()}
                       </Typography>
                     </Box>
                     <Box display="flex" gap={1}>
@@ -394,6 +395,33 @@ const Patient = () => {
             </Grid>
           </CardContent>
         </Card>
+
+        {/* Active Doctor Consents UI Fix */}
+        {consents.length > 0 && (
+          <Card sx={{ mb: 4, border: "1px solid #fcd34d", borderRadius: 3, boxShadow: "none", bgcolor: "#fffbeb" }}>
+            <CardContent>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#d97706' }}>Active Doctor Consents ({consents.length})</Typography>
+              <List disablePadding>
+                {consents.map((c, i) => (
+                  <ListItem key={i} sx={{ borderBottom: i < consents.length - 1 ? '1px solid #fde68a' : 'none', px: 0, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' } }}>
+                    <ListItemText 
+                      primary={<Typography variant="body2" sx={{ fontWeight: 'bold' }}>Doctor Address: {c.doctorId}</Typography>}
+                      secondary={
+                        <Typography variant="caption" color="textSecondary" component="span" display="block">
+                          Purpose: {c.purpose} &bull; Valid Until: {new Date(Number(c.validUntil) * 1000).toLocaleString()}
+                        </Typography>
+                      }
+                      sx={{ mb: { xs: 1, sm: 0 } }}
+                    />
+                    <Button variant="outlined" color="error" size="small" onClick={() => handleRevokeAccess(c.doctorId)}>
+                      Revoke Access
+                    </Button>
+                  </ListItem>
+                ))}
+              </List>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Medical Records Header */}
         <Card sx={{ mb: 3, background: "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)", color: 'white', borderRadius: 2 }}>
